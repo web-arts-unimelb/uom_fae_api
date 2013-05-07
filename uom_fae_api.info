@@ -1,5 +1,6 @@
-name = FaE
-description = Find an Expert
+name = Find an Expert API
+description = Use SparQL to expose Find an Expert data on your Drupal site.
 core = 7.x
 
+package = University of Melbourne
 dependencies[] = sparql

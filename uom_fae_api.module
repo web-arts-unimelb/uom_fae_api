@@ -9,34 +9,50 @@ define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 /**
  * Implements hook_init().
  */
-function fae_init() {
-  module_load_include('inc', 'fae', 'fae.queries');
+function uom_fae_api_init() {
+  // Load the predefined SparQL queries.
+  module_load_include('inc', 'uom_fae_api', 'include/uom_fae_api.queries');
+}
+
+/**
+ * Implements hook_permission().
+ */
+function uom_fae_api_permission() {
+  return array(
+    'administer fae api' => array(
+      'title' => t('Administer Find an Expert'),
+      'description' => t('Configure the Find an Expert API.')
+    ),
+    'view fae data' => array(
+      'title' => t('View Find an Expert Data'),
+    ),
+  );
 }
 
 /**
  * Implements hook_menu().
  */
-function fae_menu() {
+function uom_fae_api_menu() {
   $items['fae/organisation'] = array(
     'title' => t('Organisations'),
-    'page callback' => 'fae_organisation',
-    'access callback' => TRUE,
+    'page callback' => 'uom_fae_api_organisation',
+    'access arguments' => array('view fae data'),
     'type' => MENU_NORMAL_ITEM,
   );
 
   $items['fae/organisation/%'] = array(
     'title' => t('Information'),
-    'page callback' => 'fae_organisation_people',
+    'page callback' => 'uom_fae_api_organisation_people',
     'page arguments' => array(2),
-    'access callback' => TRUE,
+    'access arguments' => array('view fae data'),
     'type' => MENU_CALLBACK,
   );
 
   $items['fae/person/%'] = array(
     'title' => t('Information'),
-    'page callback' => 'fae_person',
+    'page callback' => 'uom_fae_api_person',
     'page arguments' => array(2),
-    'access callback' => TRUE,
+    'access arguments' => array('view fae data'),
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -45,9 +61,9 @@ function fae_menu() {
 /**
  * Page callback for organisations.
  */
-function fae_organisation() {
+function uom_fae_api_organisation() {
 
-  $result = fae_query(FAE_ORGANISATION_QUERY);
+  $result = uom_fae_api_query(FAE_ORGANISATION_QUERY);
 
   if (empty($result['rows'])) {
     return t('Empty');
@@ -71,13 +87,13 @@ function fae_organisation() {
 /**
  * Page callback for query with arguments.
  */
-function fae_organisation_people($record) {
+function uom_fae_api_organisation_people($record) {
 
   $args = array(
     ':uri' => FAE_BASE . 'individual/' . $record,
   );
 
-  $result = fae_query(FAE_ORGANISATION_PEOPLE_QUERY, $args);
+  $result = uom_fae_api_query(FAE_ORGANISATION_PEOPLE_QUERY, $args);
 
   if (empty($result['rows'])) {
     return t('Empty');
@@ -105,13 +121,13 @@ function fae_organisation_people($record) {
 /**
  * Page callback for query with arguments.
  */
-function fae_person($record) {
+function uom_fae_api_person($record) {
 
   $args = array(
     ':uri' => FAE_BASE . 'individual/' . $record,
   );
 
-  $result = fae_query(FAE_PERSON_QUERY, $args);
+  $result = uom_fae_api_query(FAE_PERSON_QUERY, $args);
 
   if (empty($result['rows'])) {
     return t('Empty');
@@ -126,7 +142,7 @@ function fae_person($record) {
   $output .= '<h3>Research</h3>';
   $output .= '<p>' . $result['rows'][0]['researchOverview'] . '</p>';
 
-  $result = fae_query(FOA_PUBLICATIONS_QUERY, $args);
+  $result = uom_fae_api_query(FOA_PUBLICATIONS_QUERY, $args);
   if (!empty($result['rows'])) {
     $rows = array();
     foreach ($result['rows'] as $item) {
@@ -150,29 +166,46 @@ function fae_person($record) {
 }
 
 /**
- * Helper that performs the SparQL query.
+ * Implements hook_uom_fae_api_query_alter().
  *
- * Performs a vararg replace much like db_query() would. Merges in :uri if missing.
+ * Add the XMLNS prefixes to the query and do the default
+ * placeholder replacements.
  */
-function fae_query($query, $args = array()) {
-  $endpoint = new stdClass();
-  $endpoint->uri = ENDPOINT;
+function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
+  $query = FAE_QUERY_PREFIX . $query;
 
   $defaults = array(
     ':uri' => FAE_BASE
   );
   $args += $defaults;
+}
+
+/**
+ * Helper that performs the SparQL query.
+ *
+ * Performs a vararg replace much like db_query() would. Merges in :uri if missing.
+ */
+function uom_fae_api_query($query, $args = array()) {
+  $endpoint = new stdClass();
+  $endpoint->uri = ENDPOINT;
+
+  // Modify the query and query argument.
+  //
+  // @see uom_fae_api_uom_fae_api_query_alter()
+  drupal_alter('uom_fae_api_query', $query, $args);
 
   // Replace vars.
   $query = strtr($query, $args);
 
-  // Add the XMLNS prefixes.
-  $query = FAE_QUERY_PREFIX . $query;
-
   $result = sparql_request($query, $endpoint);
   if ($result['result'] === FALSE) {
     drupal_set_message(t('FaE SparQL query error'), 'error');
-    dpm($query);
+    watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
   }
+
+  // Allow the result to be rewritten.
+  drupal_alter('uom_fae_api_query_result', $result);
+
+  // Return the result.
   return $result['result'];
 }
