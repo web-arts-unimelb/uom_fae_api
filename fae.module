@@ -1,0 +1,178 @@
+<?php
+/**
+ * @file
+ */
+
+define('ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
+define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
+
+/**
+ * Implements hook_init().
+ */
+function fae_init() {
+  module_load_include('inc', 'fae', 'fae.queries');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function fae_menu() {
+  $items['fae/organisation'] = array(
+    'title' => t('Organisations'),
+    'page callback' => 'fae_organisation',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['fae/organisation/%'] = array(
+    'title' => t('Information'),
+    'page callback' => 'fae_organisation_people',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['fae/person/%'] = array(
+    'title' => t('Information'),
+    'page callback' => 'fae_person',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Page callback for organisations.
+ */
+function fae_organisation() {
+
+  $result = fae_query(FAE_ORGANISATION_QUERY);
+
+  if (empty($result['rows'])) {
+    return t('Empty');
+  }
+
+  $replace = array(
+    FAE_BASE . 'individual/' => 'organisation/',
+  );
+
+  $rows = array();
+  foreach ($result['rows'] as $item) {
+    $link = strtr($item['org'], $replace);
+    $row['organisation'] = l($item['orgLabel'], 'fae/' . $link);
+    $rows[] = $row;
+  }
+
+  // Make a table.
+  return theme('table', array('rows' => $rows));
+}
+
+/**
+ * Page callback for query with arguments.
+ */
+function fae_organisation_people($record) {
+
+  $args = array(
+    ':uri' => FAE_BASE . 'individual/' . $record,
+  );
+
+  $result = fae_query(FAE_ORGANISATION_PEOPLE_QUERY, $args);
+
+  if (empty($result['rows'])) {
+    return t('Empty');
+  }
+
+  // Grab the page title.
+  drupal_set_title($result['rows'][0]['orgLabel']);
+
+  $replace = array(
+    FAE_BASE . 'individual/' => 'person/',
+  );
+
+  $rows = array();
+  foreach ($result['rows'] as $item) {
+    $link = strtr($item['person'], $replace);
+    $row['person'] = l($item['personLabel'], 'fae/' . $link);
+    $row['title'] = $item['positionLabel'];
+    $rows[] = $row;
+  }
+
+  // Make a table.
+  return theme('table', array('rows' => $rows));
+}
+
+/**
+ * Page callback for query with arguments.
+ */
+function fae_person($record) {
+
+  $args = array(
+    ':uri' => FAE_BASE . 'individual/' . $record,
+  );
+
+  $result = fae_query(FAE_PERSON_QUERY, $args);
+
+  if (empty($result['rows'])) {
+    return t('Empty');
+  }
+
+  // Grab the page title.
+  drupal_set_title(t('Staff member information'));
+
+  $output  = '<h3>Overview</h3>';
+  $output .= '<marquee style="color: red;">' . (($result['rows'][0]['availableForSup'] == 'Y') ? t('Is available as supervisor.') : t('Is not available as supervisor')) . '</marquee>';
+  $output .= '<p>' . $result['rows'][0]['overviewText1'] . '</p>';
+  $output .= '<h3>Research</h3>';
+  $output .= '<p>' . $result['rows'][0]['researchOverview'] . '</p>';
+
+  $result = fae_query(FOA_PUBLICATIONS_QUERY, $args);
+  if (!empty($result['rows'])) {
+    $rows = array();
+    foreach ($result['rows'] as $item) {
+      $date = strtotime($item['dateValue']);
+      $row['publication'] = l(strip_tags($item['pubtitle']), $item['publication']);
+      if (!empty($item['pageStart'])) {
+        $row['pages'] = t('Pg @start - @end', array('@start' => $item['pageStart'], '@end' => $item['pageEnd']));
+      }
+      else {
+        $row['pages'] = '';
+      }
+      $row['date'] = format_date($date, 'custom', 'j F Y');
+      $row['isbn'] = t('ISBN @isbn', array('@isbn' => $item['isbn13']));
+      $rows[] = $row;
+    }
+    $output .= '<h3>Publications</h3>';
+    $output .= theme('table', array('rows' => $rows));
+  }
+
+  return $output;
+}
+
+/**
+ * Helper that performs the SparQL query.
+ *
+ * Performs a vararg replace much like db_query() would. Merges in :uri if missing.
+ */
+function fae_query($query, $args = array()) {
+  $endpoint = new stdClass();
+  $endpoint->uri = ENDPOINT;
+
+  $defaults = array(
+    ':uri' => FAE_BASE
+  );
+  $args += $defaults;
+
+  // Replace vars.
+  $query = strtr($query, $args);
+
+  // Add the XMLNS prefixes.
+  $query = FAE_QUERY_PREFIX . $query;
+
+  $result = sparql_request($query, $endpoint);
+  if ($result['result'] === FALSE) {
+    drupal_set_message(t('FaE SparQL query error'), 'error');
+    dpm($query);
+  }
+  return $result['result'];
+}

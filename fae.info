@@ -1,0 +1,5 @@
+name = FaE
+description = Find an Expert
+core = 7.x
+
+dependencies[] = sparql
