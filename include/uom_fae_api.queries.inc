@@ -47,6 +47,10 @@ WHERE {
   }
 }');
 
+/*
+ * Fetch contact information for a specific person, so it can be
+ * displayed in a block.
+ */
 define('UOM_FAE_PERSON_CONTACT', '
 SELECT
   ?image ?email ?phone ?roomLabel ?buildingLabel ?supervisor
@@ -68,7 +72,7 @@ WHERE {
     ?location vivo:roomWithinBuilding ?building.
     ?building rdfs:label ?buildingLabel.
   }
-}');
+} LIMIT 1');
 
 define('FAE_PERSON_QUERY', '
 SELECT
