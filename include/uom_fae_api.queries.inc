@@ -47,6 +47,29 @@ WHERE {
   }
 }');
 
+define('UOM_FAE_PERSON_CONTACT', '
+SELECT
+  ?image ?email ?phone ?roomLabel ?buildingLabel ?supervisor
+WHERE {
+  <:uri> rdf:type vivo:FacultyMember.
+  OPTIONAL { <:uri> vivo:email ?email. }
+  OPTIONAL { <:uri> fae:webpage ?webpage. }
+  OPTIONAL { <:uri> vivo:phoneNumber ?phone. }
+  OPTIONAL { <:uri> fae:availableForSupervision ?supervisor. }
+  OPTIONAL {
+    <:uri> fae:mainImage ?file.
+    ?file fae:downloadLocation ?image.
+  }
+  OPTIONAL {
+    <:uri> fae:hasWorkLocation ?room.
+    ?room rdfs:label ?roomLabel.
+  }
+  OPTIONAL {
+    ?location vivo:roomWithinBuilding ?building.
+    ?building rdfs:label ?buildingLabel.
+  }
+}');
+
 define('FAE_PERSON_QUERY', '
 SELECT
   ?availableForSup ?supervisorText1 ?overviewText1 ?webpage ?researchOverview ?hasMediaOnlyContact ?email
