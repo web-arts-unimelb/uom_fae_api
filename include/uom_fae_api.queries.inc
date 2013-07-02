@@ -13,11 +13,11 @@ PREFIX owl:   <http://www.w3.org/2002/07/owl#>
 PREFIX fn:    <http://www.w3.org/2005/xpath-functions#>
 PREFIX ouext: <http://oracle.com/semtech/jena-adaptor/ext/user-def-function#>
 PREFIX oext:  <http://oracle.com/semtech/jena-adaptor/ext/function#>
-PREFIX ORACLE_SEM_FS_NS: <http://oracle.com/semtech#timeout=100,qid=123,STRICT_DEFAULT=F,GRAPH_MATCH_UNNAMED=T>
-PREFIX fae: <http://www.findanexpert.unimelb.edu.au/ontology/>
-PREFIX vivo: <http://vivoweb.org/ontology/core#>
-PREFIX bibo: <http://purl.org/ontology/bibo/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>');
+PREFIX ORACLE_SEM_FS_NS: <http://oracle.com/semtech#timeout=:timeout,qid=:qid,STRICT_DEFAULT=F,GRAPH_MATCH_UNNAMED=T>
+PREFIX fae:   <http://www.findanexpert.unimelb.edu.au/ontology/>
+PREFIX vivo:  <http://vivoweb.org/ontology/core#>
+PREFIX bibo:  <http://purl.org/ontology/bibo/>
+PREFIX foaf:  <http://xmlns.com/foaf/0.1/>');
 
 define('FAE_ORGANISATION_QUERY', '
 SELECT
