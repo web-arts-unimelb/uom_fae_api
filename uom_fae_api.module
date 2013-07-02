@@ -3,7 +3,7 @@
  * @file
  */
 
-define('ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
+define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 
 /**
@@ -89,29 +89,31 @@ function uom_fae_api_organisation_people($record) {
 /**
  * Return contact information for a block on a person's profile.
  */
-function uom_fae_api_person_contact($uri) {
-  $args = array(
+function uom_fae_api_person_contact($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
     ':uri' => $uri,
   );
+  $args += $defaults;
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_CONTACT, $args);
 
   if (empty($result['rows'])) {
-    return t('Empty');
+    return NULL;
   }
 
-  dpm($result);
-
+  return $result['rows'];
 }
 
 /**
  * Return overview information for a person.
  */
-function uom_fae_api_person_overview($uri) {
-
-  $args = array(
+function uom_fae_api_person_overview($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
     ':uri' => $uri,
   );
+  $args += $defaults;
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_OVERVIEW, $args);
 
@@ -163,7 +165,6 @@ function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
   $defaults = array(
     ':timeout' => 100,
     ':qid' => 'uom-fae-api',
-    ':uri' => FAE_BASE
   );
   $args += $defaults;
 }
@@ -179,7 +180,7 @@ function uom_fae_api_query($query, $args = array()) {
   $period = variable_get('cache_lifetime', 0);
 
   $endpoint = new stdClass();
-  $endpoint->uri = ENDPOINT;
+  $endpoint->uri = UOM_SPARQL_ENDPOINT;
 
   // Modify the query and query argument.
   //
