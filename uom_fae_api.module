@@ -23,39 +23,7 @@ function uom_fae_api_permission() {
       'title' => t('Administer Find an Expert'),
       'description' => t('Configure the Find an Expert API.')
     ),
-    'view fae data' => array(
-      'title' => t('View Find an Expert Data'),
-    ),
   );
-}
-
-/**
- * Implements hook_menu().
- */
-function uom_fae_api_menu() {
-  $items['fae/organisation'] = array(
-    'title' => t('Organisations'),
-    'page callback' => 'uom_fae_api_organisation',
-    'access arguments' => array('view fae data'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-
-  $items['fae/organisation/%'] = array(
-    'title' => t('Information'),
-    'page callback' => 'uom_fae_api_organisation_people',
-    'page arguments' => array(2),
-    'access arguments' => array('view fae data'),
-    'type' => MENU_CALLBACK,
-  );
-
-  $items['fae/person/%'] = array(
-    'title' => t('Information'),
-    'page callback' => 'uom_fae_api_person',
-    'page arguments' => array(2),
-    'access arguments' => array('view fae data'),
-    'type' => MENU_CALLBACK,
-  );
-  return $items;
 }
 
 /**
@@ -119,22 +87,40 @@ function uom_fae_api_organisation_people($record) {
 }
 
 /**
- * Page callback for query with arguments.
+ * Return contact information for a block on a person's profile.
  */
-function uom_fae_api_person($record) {
-
+function uom_fae_api_person_contact($uri) {
   $args = array(
-    ':uri' => FAE_BASE . 'individual/' . $record,
+    ':uri' => $uri,
   );
 
-  $result = uom_fae_api_query(FAE_PERSON_QUERY, $args);
+  $result = uom_fae_api_query(UOM_FAE_PERSON_CONTACT, $args);
 
   if (empty($result['rows'])) {
     return t('Empty');
   }
 
-  // Grab the page title.
-  drupal_set_title(t('Staff member information'));
+  dpm($result);
+
+}
+
+/**
+ * Return overview information for a person.
+ */
+function uom_fae_api_person_overview($uri) {
+
+  $args = array(
+    ':uri' => $uri,
+  );
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_OVERVIEW, $args);
+
+  if (empty($result['rows'])) {
+    return t('Empty');
+  }
+
+  // Preprocess the result into something themeable.
+
 
   $output  = '<h3>Overview</h3>';
   $output .= '<marquee style="color: red;">' . (($result['rows'][0]['availableForSup'] == 'Y') ? t('Is available as supervisor.') : t('Is not available as supervisor')) . '</marquee>';
@@ -175,6 +161,8 @@ function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
   $query = FAE_QUERY_PREFIX . $query;
 
   $defaults = array(
+    ':timeout' => 100,
+    ':qid' => 'uom-fae-api',
     ':uri' => FAE_BASE
   );
   $args += $defaults;
