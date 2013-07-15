@@ -53,7 +53,7 @@ WHERE {
  */
 define('UOM_FAE_PERSON_CONTACT', '
 SELECT
-  ?image ?email ?phone ?roomLabel ?buildingLabel ?supervisor
+  ?image ?email ?phone ?room ?building ?supervisor
 WHERE {
   <:uri> rdf:type vivo:FacultyMember.
   OPTIONAL { <:uri> vivo:email ?email. }
@@ -65,12 +65,12 @@ WHERE {
     ?file fae:downloadLocation ?image.
   }
   OPTIONAL {
-    <:uri> fae:hasWorkLocation ?room.
-    ?room rdfs:label ?roomLabel.
+    <:uri> fae:hasWorkLocation ?roomItem.
+    ?roomItem rdfs:label ?room.
   }
   OPTIONAL {
-    ?location vivo:roomWithinBuilding ?building.
-    ?building rdfs:label ?buildingLabel.
+    ?location vivo:roomWithinBuilding ?buildingItem.
+    ?buildingItem rdfs:label ?building.
   }
 } LIMIT 1');
 

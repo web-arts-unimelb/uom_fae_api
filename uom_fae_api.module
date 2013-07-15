@@ -102,7 +102,7 @@ function uom_fae_api_person_contact($uri, $args = array()) {
     return NULL;
   }
 
-  return $result['rows'];
+  return $result['rows'][0];
 }
 
 /**
