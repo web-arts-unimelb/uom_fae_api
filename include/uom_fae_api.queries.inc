@@ -4,8 +4,7 @@
  * Define canned queries for FAE SparQL.
  */
 
-define('FAE_QUERY_PREFIX', '
-PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+define('FAE_QUERY_PREFIX', 'PREFIX dc:    <http://purl.org/dc/elements/1.1/>
 PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
@@ -74,35 +73,27 @@ WHERE {
   }
 } LIMIT 1');
 
-define('FAE_PERSON_QUERY', '
+define('UOM_FAE_PERSON_OVERVIEW', '
 SELECT
-  ?availableForSup ?supervisorText1 ?overviewText1 ?webpage ?researchOverview ?hasMediaOnlyContact ?email
+  ?overviewText1
 WHERE {
   <:uri> rdf:type vivo:FacultyMember.
   OPTIONAL {
-   <:uri> fae:availableForSupervision ?availableForSup
-  }
-  OPTIONAL {
-    <:uri>  fae:supervisorText1 ?supervisorText1
-  }
-  OPTIONAL {
     <:uri>  fae:overviewText1 ?overviewText1
-  }
-  OPTIONAL {
-    <:uri>  fae:webpage ?webpage
-  }
-  OPTIONAL {
-    <:uri>  vivo:researchOverview ?researchOverview
-  }
-  OPTIONAL {
-    <:uri>  fae:hasMediaOnlyContact ?hasMediaOnlyContact
-  }
-  OPTIONAL {
-    <:uri>  vivo:email ?email
   }
 }');
 
-define('FOA_PUBLICATIONS_QUERY', '
+define('UOM_FAE_PERSON_AFFILIATION', '
+SELECT
+  ?overviewText1
+WHERE {
+  <:uri> rdf:type vivo:memberRoleOf.
+  OPTIONAL {
+    <:uri>  fae:overviewText1 ?overviewText1
+  }
+}');
+
+define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
   ?publication ?pubtitle ?pubtype ?dateValue ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume
 WHERE {

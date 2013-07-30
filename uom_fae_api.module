@@ -27,63 +27,134 @@ function uom_fae_api_permission() {
 }
 
 /**
- * Page callback for organisations.
+ * Return overview information for a person.
  */
-function uom_fae_api_organisation() {
+function uom_fae_api_person_overview($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
 
-  $result = uom_fae_api_query(FAE_ORGANISATION_QUERY);
+  $result = uom_fae_api_query(UOM_FAE_PERSON_OVERVIEW, $args);
 
   if (empty($result['rows'])) {
     return t('Empty');
   }
 
-  $replace = array(
-    FAE_BASE . 'individual/' => 'organisation/',
-  );
-
-  $rows = array();
-  foreach ($result['rows'] as $item) {
-    $link = strtr($item['org'], $replace);
-    $row['organisation'] = l($item['orgLabel'], 'fae/' . $link);
-    $rows[] = $row;
-  }
-
-  // Make a table.
-  return theme('table', array('rows' => $rows));
+  return $result['rows'];
 }
 
 /**
- * Page callback for query with arguments.
+ * Return a person's affiliation.
  */
-function uom_fae_api_organisation_people($record) {
-
-  $args = array(
-    ':uri' => FAE_BASE . 'individual/' . $record,
+function uom_fae_api_person_affiliation($uri, $args = array()) {
+  $defaults = array(
+    ':uri' => $uri,
   );
+  $args += $defaults;
 
-  $result = uom_fae_api_query(FAE_ORGANISATION_PEOPLE_QUERY, $args);
+  $result = uom_fae_api_query(UOM_FAE_PERSON_AFFILIATION, $args);
 
   if (empty($result['rows'])) {
-    return t('Empty');
+    return NULL;
   }
 
-  // Grab the page title.
-  drupal_set_title($result['rows'][0]['orgLabel']);
+  return $result['rows'];
+}
 
-  $replace = array(
-    FAE_BASE . 'individual/' => 'person/',
+/**
+ * Return a person's publications.
+ */
+function uom_fae_api_person_publications($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
   );
+  $args += $defaults;
 
-  $rows = array();
-  foreach ($result['rows'] as $item) {
-    $link = strtr($item['person'], $replace);
-    $row['person'] = l($item['personLabel'], 'fae/' . $link);
-    $row['title'] = $item['positionLabel'];
-    $rows[] = $row;
+  $result = uom_fae_api_query(UOM_FAE_PERSON_PUBLICATIONS, $args);
+
+  if (empty($result['rows'])) {
+    return NULL;
   }
 
-  // Make a table.
-  return theme('table', array('rows' => $rows));
+  return $result['rows'];
+}
+
+/**
+ * Return a person's research.
+ */
+function uom_fae_api_person_research($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_RESEARCH, $args);
+
+  if (empty($result['rows'])) {
+    return NULL;
+  }
+
+  return $result['rows'];
+}
+
+/**
+ * Return a person's awards.
+ */
+function uom_fae_api_person_awards($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_AWARDS, $args);
+
+  if (empty($result['rows'])) {
+    return NULL;
+  }
+
+  return $result['rows'];
+}
+/**
+ * Return a person's linkages.
+ */
+function uom_fae_api_person_linkages($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_LINKAGES, $args);
+
+  if (empty($result['rows'])) {
+    return NULL;
+  }
+
+  return $result['rows'];
+}
+
+/**
+ * Return a person's supervision.
+ */
+function uom_fae_api_person_supervision($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_SUPERVISION, $args);
+
+  if (empty($result['rows'])) {
+    return NULL;
+  }
+
+  return $result['rows'];
 }
 
 /**
@@ -103,54 +174,6 @@ function uom_fae_api_person_contact($uri, $args = array()) {
   }
 
   return $result['rows'][0];
-}
-
-/**
- * Return overview information for a person.
- */
-function uom_fae_api_person_overview($uri, $args = array()) {
-  // Mash in default arguments.
-  $defaults = array(
-    ':uri' => $uri,
-  );
-  $args += $defaults;
-
-  $result = uom_fae_api_query(UOM_FAE_PERSON_OVERVIEW, $args);
-
-  if (empty($result['rows'])) {
-    return t('Empty');
-  }
-
-  // Preprocess the result into something themeable.
-
-
-  $output  = '<h3>Overview</h3>';
-  $output .= '<marquee style="color: red;">' . (($result['rows'][0]['availableForSup'] == 'Y') ? t('Is available as supervisor.') : t('Is not available as supervisor')) . '</marquee>';
-  $output .= '<p>' . $result['rows'][0]['overviewText1'] . '</p>';
-  $output .= '<h3>Research</h3>';
-  $output .= '<p>' . $result['rows'][0]['researchOverview'] . '</p>';
-
-  $result = uom_fae_api_query(FOA_PUBLICATIONS_QUERY, $args);
-  if (!empty($result['rows'])) {
-    $rows = array();
-    foreach ($result['rows'] as $item) {
-      $date = strtotime($item['dateValue']);
-      $row['publication'] = l(strip_tags($item['pubtitle']), $item['publication']);
-      if (!empty($item['pageStart'])) {
-        $row['pages'] = t('Pg @start - @end', array('@start' => $item['pageStart'], '@end' => $item['pageEnd']));
-      }
-      else {
-        $row['pages'] = '';
-      }
-      $row['date'] = format_date($date, 'custom', 'j F Y');
-      $row['isbn'] = t('ISBN @isbn', array('@isbn' => $item['isbn13']));
-      $rows[] = $row;
-    }
-    $output .= '<h3>Publications</h3>';
-    $output .= theme('table', array('rows' => $rows));
-  }
-
-  return $output;
 }
 
 /**
@@ -188,7 +211,7 @@ function uom_fae_api_query($query, $args = array()) {
   drupal_alter('uom_fae_api_query', $query, $args);
 
   // Replace vars.
-  $query = strtr($query, $args);
+  $query = trim(strtr($query, $args));
 
   // Now that we have a full query, check if there is a cached result for it
   // and load that. Then continue, so that the alter hooks are called.
