@@ -95,7 +95,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
-  ?publication ?pubtitle ?pubtype ?dateValue ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume
+  ?publication ?pubtitle ?pubtype ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume
 WHERE {
   <:uri> vivo:authorInAuthorship ?authorship .
   ?authorship vivo:linkedInformationResource ?publication .
@@ -103,6 +103,8 @@ WHERE {
   ?publication rdf:type ?pubtype .
   ?publication vivo:dateTimeValue ?dateTimeValue .
   ?dateTimeValue vivo:dateTime ?dateValue .
+  ?publication vivo:publisher ?publisher .
+  ?publisher rdfs:label ?publishOrg .
   OPTIONAL {
     ?publication bibo:doi ?doi
   }
