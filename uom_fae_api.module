@@ -154,7 +154,7 @@ function uom_fae_api_person_supervision($uri, $args = array()) {
     return NULL;
   }
 
-  return $result['rows'];
+  return $result['rows'][0];
 }
 
 /**
