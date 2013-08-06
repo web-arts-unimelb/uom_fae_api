@@ -125,3 +125,15 @@ WHERE {
   }
   FILTER regex(?pubtype, "findanexpert")
 }');
+
+/*
+ * Fetch supervision information for a specific person.
+ */
+define('UOM_FAE_PERSON_SUPERVISION', '
+SELECT
+  ?supervisor ?supervisorText1
+WHERE {
+  <:uri> rdf:type vivo:FacultyMember.
+  OPTIONAL { <:uri> fae:availableForSupervision ?supervisor. }
+  OPTIONAL { <:uri> fae:supervisorText1 ?supervisorText1. }
+}');
