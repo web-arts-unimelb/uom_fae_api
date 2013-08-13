@@ -87,7 +87,7 @@ define('UOM_FAE_PERSON_AFFILIATION', '
 SELECT
   ?orgLabel ?roleLabel ?dateValue
 WHERE {
-  <:uri> rdf:type vivo:hasMemberRole ?role .
+  <:uri> vivo:hasMemberRole ?role .
   ?role vivo:roleIn ?roleOrg .
   ?role rdfs:label ?roleLabel .
   ?roleOrg rdfs:label ?orgLabel .
@@ -136,7 +136,7 @@ SELECT
 WHERE {
   ?grant a vivo:Grant .
   ?grant vivo:contributingRole ?role .
-  ?role vivo:investigatorRoleOf <http://www.findanexpert.unimelb.edu.au/individual/person18219> .
+  ?role vivo:investigatorRoleOf <:uri> .
   ?grant rdfs:label ?grantLabel .
   ?grant fae:scheme ?grantScheme .
   OPTIONAL {
