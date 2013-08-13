@@ -85,7 +85,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_AFFILIATION', '
 SELECT
-  ?orgLabel ?roleLabel ?interval
+  ?orgLabel ?roleLabel ?dateValue
 WHERE {
   <:uri> rdf:type vivo:hasMemberRole ?role .
   ?role vivo:roleIn ?roleOrg .
@@ -93,7 +93,7 @@ WHERE {
   ?roleOrg rdfs:label ?orgLabel .
   OPTIONAL {
     ?role vivo:dateTimeValue ?dateTimeValue .
-    ?dateTimeValue vivo:dateTime ?interval .
+    ?dateTimeValue vivo:dateTime ?dateValue .
   }
 }');
 
@@ -130,15 +130,32 @@ WHERE {
   FILTER regex(?pubtype, "findanexpert")
 }');
 
+define('UOM_FAE_PERSON_AWARDS', '
+SELECT
+  ?awardLabel ?orgLabel ?dateValue
+WHERE {
+  <:uri> vivo:awardOrHonor ?award .
+  ?award rdfs:label ?awardLabel .
+  ?award vivo:awardConferredBy ?org .
+  ?org rdfs:label ?orgLabel .
+  OPTIONAL {
+    ?award vivo:dateTimeValue ?dateTimeValue .
+    ?dateTimeValue vivo:dateTime ?dateValue .
+  }
+}');
 
 define('UOM_FAE_PERSON_LINKAGES', '
 SELECT
-  ?orgLabel ?roleLabel
+  ?orgLabel ?roleLabel ?dateValue
 WHERE {
   <:uri> fae:internationalLinkageRole ?role .
   ?role rdfs:label ?roleLabel .
   ?role vivo:roleIn ?org .
   ?org rdfs:label ?orgLabel .
+  OPTIONAL {
+    ?role vivo:dateTimeValue ?dateTimeValue .
+    ?dateTimeValue vivo:dateTime ?dateValue .
+  }
 }');
 
 /*
