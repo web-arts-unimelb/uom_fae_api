@@ -85,11 +85,15 @@ WHERE {
 
 define('UOM_FAE_PERSON_AFFILIATION', '
 SELECT
-  ?overviewText1
+  ?orgLabel ?roleLabel ?interval
 WHERE {
-  <:uri> rdf:type vivo:memberRoleOf.
+  <:uri> rdf:type vivo:hasMemberRole ?role .
+  ?role vivo:roleIn ?roleOrg .
+  ?role rdfs:label ?roleLabel .
+  ?roleOrg rdfs:label ?orgLabel .
   OPTIONAL {
-    <:uri>  fae:overviewText1 ?overviewText1
+    ?role vivo:dateTimeValue ?dateTimeValue .
+    ?dateTimeValue vivo:dateTime ?interval .
   }
 }');
 
