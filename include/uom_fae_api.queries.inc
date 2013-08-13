@@ -130,6 +130,17 @@ WHERE {
   FILTER regex(?pubtype, "findanexpert")
 }');
 
+
+define('UOM_FAE_PERSON_LINKAGES', '
+SELECT
+  ?orgLabel ?roleLabel
+WHERE {
+  <:uri> fae:internationalLinkageRole ?role .
+  ?role rdfs:label ?roleLabel .
+  ?role vivo:roleIn ?org .
+  ?org rdfs:label ?orgLabel .
+}');
+
 /*
  * Fetch supervision information for a specific person.
  */
