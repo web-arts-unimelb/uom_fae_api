@@ -130,6 +130,26 @@ WHERE {
   FILTER regex(?pubtype, "findanexpert")
 }');
 
+define('UOM_FOA_PERSON_RESEARCH', '
+SELECT
+  ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateValue
+WHERE {
+  ?grant a vivo:Grant .
+  ?grant vivo:contributingRole ?role .
+  ?role vivo:investigatorRoleOf <http://www.findanexpert.unimelb.edu.au/individual/person18219> .
+  ?grant rdfs:label ?grantLabel .
+  ?grant fae:scheme ?grantScheme .
+  OPTIONAL {
+    ?role rdfs:label ?roleLabel .
+    ?role vivo:dateTimeValue ?dateTimeValue .
+    ?dateTimeValue vivo:dateTime ?dateValue .
+  }
+  OPTIONAL {
+    ?grant vivo:grantAwardedBy ?org .
+    ?org rdfs:label ?orgLabel .
+  }
+}');
+
 define('UOM_FAE_PERSON_AWARDS', '
 SELECT
   ?awardLabel ?orgLabel ?dateValue
