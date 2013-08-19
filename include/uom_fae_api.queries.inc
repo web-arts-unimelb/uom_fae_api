@@ -136,7 +136,7 @@ WHERE {
 
 define('UOM_FOA_PERSON_RESEARCH', '
 SELECT
-  ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateValue
+  ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateStart ?dateEnd
 WHERE {
   ?grant a vivo:Grant .
   ?grant vivo:contributingRole ?role .
@@ -145,8 +145,13 @@ WHERE {
   ?grant fae:scheme ?grantScheme .
   OPTIONAL {
     ?role rdfs:label ?roleLabel .
-    ?role vivo:dateTimeValue ?dateTimeValue .
-    ?dateTimeValue vivo:dateTime ?dateValue .
+  }
+  OPTIONAL {
+    ?grant vivo:dateTimeInterval ?dateTimeInterval .
+    ?dateTimeInterval vivo:start ?dateTimeStart .
+    ?dateTimeInterval vivo:end ?dateTimeEnd .
+    ?dateTimeStart vivo:dateTime ?dateStart .
+    ?dateTimeEnd vivo:dateTime ?dateEnd .
   }
   OPTIONAL {
     ?grant vivo:grantAwardedBy ?org .
