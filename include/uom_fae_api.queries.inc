@@ -136,7 +136,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_RESEARCH', '
 SELECT
-  ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateStart ?dateEnd
+  ?grant ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateStart ?dateEnd
 WHERE {
   ?grant a vivo:Grant .
   ?grant vivo:contributingRole ?role .
