@@ -134,7 +134,7 @@ WHERE {
   FILTER regex(?type, "findanexpert")
 }');
 
-define('UOM_FOA_PERSON_RESEARCH', '
+define('UOM_FAE_PERSON_RESEARCH', '
 SELECT
   ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateStart ?dateEnd
 WHERE {
