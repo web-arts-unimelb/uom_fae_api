@@ -99,35 +99,39 @@ WHERE {
 
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
-  ?publication ?pubtitle ?pubtype ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume
+  ?publication ?article ?title ?type ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume
 WHERE {
   <:uri> vivo:authorInAuthorship ?authorship .
-  ?authorship vivo:linkedInformationResource ?publication .
-  ?publication rdfs:label ?pubtitle .
-  ?publication rdf:type ?pubtype .
-  ?publication vivo:dateTimeValue ?dateTimeValue .
+  ?authorship vivo:linkedInformationResource ?article .
+  ?article rdfs:label ?title .
+  ?article rdf:type ?type .
+  ?article vivo:dateTimeValue ?dateTimeValue .
   ?dateTimeValue vivo:dateTime ?dateValue .
-  ?publication vivo:publisher ?publisher .
+  ?article vivo:publisher ?publisher .
   ?publisher rdfs:label ?publishOrg .
   OPTIONAL {
-    ?publication bibo:doi ?doi
+    ?article vivo:hasPublicationVenue ?pubVenue .
+    ?pubVenue rdfs:label ?publication .
   }
   OPTIONAL {
-    ?publication bibo:pageStart ?pageStart
+    ?article bibo:doi ?doi
   }
   OPTIONAL {
-    ?publication bibo:pageEnd ?pageEnd
+    ?article bibo:pageStart ?pageStart
   }
   OPTIONAL {
-    ?publication bibo:edition ?edition
+    ?article bibo:pageEnd ?pageEnd
   }
   OPTIONAL {
-    ?publication bibo:isbn13 ?isbn13
+    ?article bibo:edition ?edition
   }
   OPTIONAL {
-    ?publication bibo:volume ?volume
+    ?article bibo:isbn13 ?isbn13
   }
-  FILTER regex(?pubtype, "findanexpert")
+  OPTIONAL {
+    ?article bibo:volume ?volume
+  }
+  FILTER regex(?type, "findanexpert")
 }');
 
 define('UOM_FOA_PERSON_RESEARCH', '
