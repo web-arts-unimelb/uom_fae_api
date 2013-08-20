@@ -161,7 +161,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_AWARDS', '
 SELECT
-  ?awardLabel ?orgLabel ?dateValue
+  ?award ?awardLabel ?orgLabel ?dateValue
 WHERE {
   <:uri> vivo:awardOrHonor ?award .
   ?award rdfs:label ?awardLabel .
@@ -175,7 +175,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_LINKAGES', '
 SELECT
-  ?orgLabel ?roleLabel ?dateValue
+  ?org ?orgLabel ?roleLabel ?dateValue
 WHERE {
   <:uri> fae:internationalLinkageRole ?role .
   ?role rdfs:label ?roleLabel .

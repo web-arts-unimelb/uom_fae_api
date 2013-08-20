@@ -7,6 +7,26 @@ define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 
 /**
+ * Implements hook_permission().
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function uom_fae_api_menu() {
+  $items['admin/config/services/uom-fae'] = array(
+    'title' => t('Find an Expert'),
+    'description' => t('Configure the Find an Expert API.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('uom_fae_api_admin_form'),
+    'access arguments' => array('administer uom fae api'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'uom_fae_api.admin.inc',
+  );
+  return $items;
+}
+
+/**
  * Implements hook_init().
  */
 function uom_fae_api_init() {
@@ -19,7 +39,7 @@ function uom_fae_api_init() {
  */
 function uom_fae_api_permission() {
   return array(
-    'administer fae api' => array(
+    'administer uom fae api' => array(
       'title' => t('Administer Find an Expert'),
       'description' => t('Configure the Find an Expert API.')
     ),
