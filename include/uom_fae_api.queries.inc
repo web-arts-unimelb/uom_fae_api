@@ -64,12 +64,10 @@ WHERE {
     ?file fae:downloadLocation ?image.
   }
   OPTIONAL {
-    <:uri> fae:hasWorkLocation ?roomItem.
-    ?roomItem rdfs:label ?room.
-  }
-  OPTIONAL {
-    ?location vivo:roomWithinBuilding ?buildingItem.
-    ?buildingItem rdfs:label ?building.
+    <:uri> fae:hasWorkLocation ?location.
+    ?location vivo:roomWithinBuilding ?bldg .
+    ?location rdfs:label ?room .
+    ?bldg rdfs:label ?building .
   }
 } LIMIT 1');
 
