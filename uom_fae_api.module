@@ -220,7 +220,7 @@ function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
  * Will query the raw response on success if caching is enabled.
  */
 function uom_fae_api_query($query, $args = array()) {
-  $period = variable_get('cache_lifetime', 0);
+  $period = variable_get('uom_fae_api_cache', 0);
 
   $endpoint = new stdClass();
   $endpoint->uri = UOM_SPARQL_ENDPOINT;
@@ -232,9 +232,6 @@ function uom_fae_api_query($query, $args = array()) {
 
   // Replace vars.
   $query = trim(strtr($query, $args));
-
-	//test
-	//dsm($query);
 
   // Now that we have a full query, check if there is a cached result for it
   // and load that. Then continue, so that the alter hooks are called.

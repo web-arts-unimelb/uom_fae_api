@@ -17,17 +17,15 @@ function uom_fae_api_admin_form() {
     '#default_value' => variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT),
   );
 
-  $cache = variable_get('cache_lifetime', 0);
-  if (!empty($cache)) {
-    $form['uom_fae_api_cache'] = array(
-      '#markup' => t('Caching is enabled. Drupal will cache API responses for at least @interval.', array('@interval' => format_interval($cache))),
-    );
-  }
-  else {
-    $form['uom_fae_api_cache'] = array(
-      '#markup' => t('Caching is disabled. You can enable it by setting a minimum cache lifetime at !link.', array('!link' => l('performance settings', 'admin/config/development/performance'))),
-    );
-  }
+  $period = drupal_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
+  $period[0] = '<' . t('none') . '>';
+  $form['uom_fae_api_cache'] = array(
+    '#type' => 'select',
+    '#title' => t('SparQL query cache lifetime'),
+    '#default_value' => variable_get('uom_fae_api_cache', 0),
+    '#options' => $period,
+    '#description' => t('Cached queries will not be re-sent to the configured endpoint until this much time has elapsed.')
+  );
 
   $form['#validate'][] = 'uom_foa_api_admin_form_validate';
   $form['#submit'][] = 'uom_foa_api_admin_form_submit';
