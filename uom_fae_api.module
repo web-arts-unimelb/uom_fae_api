@@ -206,8 +206,8 @@ function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
   $query = FAE_QUERY_PREFIX . $query;
 
   $defaults = array(
-    ':timeout' => 100,
-    ':qid' => 'uom-fae-api',
+    ':timeout' => variable_get('uom_fae_api_timeout', 30),
+    ':qid' => variable_get('uom_fae_api_qid', 'uom-fae-api'),
   );
   $args += $defaults;
 }
@@ -223,7 +223,7 @@ function uom_fae_api_query($query, $args = array()) {
   $period = variable_get('uom_fae_api_cache', 0);
 
   $endpoint = new stdClass();
-  $endpoint->uri = UOM_SPARQL_ENDPOINT;
+  $endpoint->uri = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
 
   // Modify the query and query argument.
   //

@@ -10,11 +10,35 @@ function uom_fae_api_admin_form() {
   $form = array();
 
   $form['uom_fae_api_endpoint'] = array(
-    '#title' => t('SparQL Endpoint'),
+    '#title' => t('SparQL endpoint'),
     '#description' => t('Enter the URL for the SparQL endpoint that provides Find an Expert information.'),
     '#type' => 'textfield',
     '#required' => TRUE,
     '#default_value' => variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT),
+  );
+
+  $timeout = array(
+    '5'  => t('5 seconds'),
+    '10' => t('10 seconds'),
+    '20' => t('20 seconds'),
+    '30' => t('30 seconds'),
+    '45' => t('45 seconds'),
+    '60' => t('1 minute'),
+  );
+  $form['uom_fae_api_timeout'] = array(
+    '#title' => t('Query timeout'),
+    '#description' => t('Choose a timeout for your query. If the endpoint takes longer to respond, the query will be aborted.'),
+    '#type' => 'select',
+    '#options' => $timeout,
+    '#required' => TRUE,
+    '#default_value' => variable_get('uom_fae_api_timeout', 30),
+  );
+
+  $form['uom_fae_api_qid'] = array(
+    '#title' => t('Query id'),
+    '#description' => t('Enter an ID string to identify queries on the endpoint. This can help identify queries that get stuck.'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('uom_fae_api_qid', 'uom-fae-api'),
   );
 
   $period = drupal_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');

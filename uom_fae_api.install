@@ -8,5 +8,7 @@
  */
 function uom_fae_api_uninstall() {
   variable_del('uom_fae_api_endpoint');
+  variable_del('uom_fae_api_timeout');
+  variable_del('uom_fae_api_qid');
   variable_del('uom_fae_api_cache');
 }
