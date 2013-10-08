@@ -53,11 +53,7 @@ function uom_fae_api_person_overview($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_OVERVIEW, $args);
 
-  if (empty($result['rows'])) {
-    return t('Empty');
-  }
-	
-  return $result['rows'][0];
+  return (!empty($result['rows'])) ? $result['rows'][0] : t('Empty');
 }
 
 /**
@@ -71,11 +67,7 @@ function uom_fae_api_person_affiliation($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_AFFILIATION, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -90,11 +82,7 @@ function uom_fae_api_person_publications($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_PUBLICATIONS, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -109,11 +97,7 @@ function uom_fae_api_person_research($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_RESEARCH, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -128,12 +112,9 @@ function uom_fae_api_person_awards($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_AWARDS, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
+
 /**
  * Return a person's linkages.
  */
@@ -146,11 +127,7 @@ function uom_fae_api_person_linkages($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_LINKAGES, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -165,11 +142,7 @@ function uom_fae_api_person_supervision($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_SUPERVISION, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'][0];
+  return (!empty($result['rows'])) ? $result['rows'][0] : NULL;
 }
 
 /**
@@ -184,12 +157,24 @@ function uom_fae_api_person_contact($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_CONTACT, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'][0];
+  return (!empty($result['rows'])) ? $result['rows'][0] : NULL;
 }
+
+/**
+ * Return research grants for a given organisation.
+ */
+function uom_fae_api_organisation_research($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_ORGANISATION_GRANTS, $args);
+
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
+}
+
 
 /**
  * Implements hook_uom_fae_api_query_alter().

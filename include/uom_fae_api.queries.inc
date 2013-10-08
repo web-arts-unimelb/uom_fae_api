@@ -205,3 +205,24 @@ WHERE {
   OPTIONAL { <:uri> fae:availableForSupervision ?supervisor. }
   OPTIONAL { <:uri> fae:supervisorText1 ?supervisorText1. }
 }');
+
+define('UOM_FAE_ORGANISATION_GRANTS', '
+SELECT
+  ?grantLabel ?grantScheme ?dateStart ?dateEnd ?orgLabel
+WHERE {
+  ?grant a vivo:Grant .
+  ?grant vivo:administeredBy <:uri> .
+  ?grant rdfs:label ?grantLabel .
+  ?grant fae:scheme ?grantScheme .
+  OPTIONAL {
+    ?grant vivo:dateTimeInterval ?dateTimeInterval .
+    ?dateTimeInterval vivo:start ?dateTimeStart .
+    ?dateTimeInterval vivo:end ?dateTimeEnd .
+    ?dateTimeStart vivo:dateTime ?dateStart .
+    ?dateTimeEnd vivo:dateTime ?dateEnd .
+  }
+  OPTIONAL {
+    ?grant vivo:grantAwardedBy ?org .
+    ?org rdfs:label ?orgLabel .
+  }
+}');

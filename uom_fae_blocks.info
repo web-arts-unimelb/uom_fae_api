@@ -1,0 +1,6 @@
+name = Find an Expert Blocks
+description = Provide blocks populated by data from Find an Expert.
+core = 7.x
+
+package = University of Melbourne
+dependencies[] = uom_fae_api

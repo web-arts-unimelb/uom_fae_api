@@ -1,0 +1,95 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function uom_fae_blocks_block_info() {
+  for ($delta = 0; $delta < variable_get('uom_fae_blocks', 1); $delta++) {
+    $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults($delta));
+    $blocks[$delta]['info'] = $settings['description'];
+    $blocks[$delta]['cache'] = DRUPAL_CACHE_GLOBAL;
+  }
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function uom_fae_blocks_block_configure($delta) {
+  $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults($delta));
+
+  $callbacks = array(
+    'grants' => t('Grants'),
+  );
+
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Block description'),
+    '#default_value' => $settings['description'],
+    '#description' => t('A brief description of your block. Used on the <a href="@block-overview-page">block overview page</a>.', array('@block-overview-page' => url('admin/build/block')))
+  );
+  $form['resource'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Resource URI'),
+    '#default_value' => $settings['resource'],
+    '#description' => t('The Find an Expert resource URI query query for information. This should be the internal URI you obtain via the paperclip icon, not the browser URL when vieiwing a page on Find an Expert.'),
+    '#required' => TRUE,
+  );
+  $form['callback'] = array(
+    '#type' => 'select',
+    '#title' => t('Resource type'),
+    '#default_value' => $settings['callback'],
+    '#options' => $callbacks,
+    '#description' => t('The resource type determines how results are parsed and displayed.'),
+    '#required' => TRUE,
+  );
+}
+
+/**
+ * Implements hook_block_save().
+ */
+function uom_fae_blocks_block_save($delta = '', $edit = array()) {
+  if (empty($edit['resource']) || !drupal_valid_url($edit['resource'], TRUE)) {
+    drupal_set_message(t('The resource uri should contain a valid URL.'), 'error');
+    return;
+  }
+
+  $settings = array(
+    'description' => $edit['description'],
+    'resource' => $edit['resource'],
+    'callback' => $edit['callback'],
+  );
+
+  variable_set('uom_fae_blocks_' . $delta, $settings);
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function uom_fae_blocks_block_view($delta = '') {
+  // Load settings for the specified block.
+  $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults());
+
+  // Fetch the results *and* a theme wrapper.
+  $data = call_user_func($settings['callback'], $settings['resource']);
+
+  // Output block HTML
+  return array(
+    'subject' => t('FaE Block'),
+    'content' => theme($data['theme'], $data['result']),
+  );
+}
+
+/**
+ * Helper that returns an array of default settings.
+ */
+function uom_fae_blocks_defaults($delta = 0) {
+  return array(
+    'description' => t('Find an Expert Block: unconfigured @delta', array('@delta' => $delta)),
+    'resource' => '',
+    'theme' => '',
+  );
+}
