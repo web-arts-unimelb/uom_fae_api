@@ -6,6 +6,9 @@
 define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 
+// Load the predefined SparQL queries.
+module_load_include('inc', 'uom_fae_api', 'include/uom_fae_api.queries');
+
 /**
  * Implements hook_permission().
  */
@@ -24,14 +27,6 @@ function uom_fae_api_menu() {
     'file' => 'uom_fae_api.admin.inc',
   );
   return $items;
-}
-
-/**
- * Implements hook_init().
- */
-function uom_fae_api_init() {
-  // Load the predefined SparQL queries.
-  module_load_include('inc', 'uom_fae_api', 'include/uom_fae_api.queries');
 }
 
 /**
