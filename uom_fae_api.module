@@ -23,8 +23,17 @@ function uom_fae_api_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('uom_fae_api_admin_form'),
     'access arguments' => array('administer uom fae api'),
-    'type' => MENU_NORMAL_ITEM,
     'file' => 'uom_fae_api.admin.inc',
+  );
+  $items['admin/config/services/uom-fae/api'] = array(
+    'title' => t('Find an Expert API'),
+    'description' => t('Configure the Find an Expert API.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('uom_fae_api_admin_form'),
+    'access arguments' => array('administer uom fae api'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'uom_fae_api.admin.inc',
+    'weight' => -10,
   );
   return $items;
 }
@@ -236,4 +245,28 @@ function uom_fae_api_query($query, $args = array()) {
 
   // Return the result.
   return $result['result'];
+}
+
+/**
+ * Return a list of all callbacks defined via hook_uom_fae_api_callbacks().
+ */
+function uom_fae_api_callbacks() {
+  $callbacks = &drupal_static(__FUNCTION__);
+
+  if (!empty($callbacks)) {
+    return $callbacks;
+  }
+
+  $module_info = system_get_info('module');
+
+  // Get list of callbacks.
+  foreach (module_implements('uom_fae_api_callbacks') as $module) {
+    $functions = module_invoke($module, 'uom_fae_api_callbacks');
+    foreach ($functions as $function => $name) {
+      $callbacks[$module_info[$module]['name']][$function] = check_plain($name);
+    }
+  }
+
+  ksort($callbacks);
+  return $callbacks;
 }

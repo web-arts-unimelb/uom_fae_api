@@ -4,6 +4,21 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function uom_fae_blocks_menu() {
+  $items['admin/config/services/uom-fae/blocks'] = array(
+    'title' => t('Find an Expert Blocks'),
+    'description' => t('Configure the Find an Expert Blocks module.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('uom_fae_blocks_settings_form'),
+    'access arguments' => array('administer uom fae api'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
  * Implements hook_block_info().
  */
 function uom_fae_blocks_block_info() {
@@ -21,9 +36,7 @@ function uom_fae_blocks_block_info() {
 function uom_fae_blocks_block_configure($delta) {
   $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults($delta));
 
-  $callbacks = array(
-    'grants' => t('Grants'),
-  );
+  $callbacks = uom_fae_api_callbacks();
 
   $form['description'] = array(
     '#type' => 'textfield',
@@ -31,14 +44,21 @@ function uom_fae_blocks_block_configure($delta) {
     '#default_value' => $settings['description'],
     '#description' => t('A brief description of your block. Used on the <a href="@block-overview-page">block overview page</a>.', array('@block-overview-page' => url('admin/build/block')))
   );
-  $form['resource'] = array(
+
+  $form['#tree'] = FALSE;
+  $form['fae'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Find an Expert Settings'),
+  );
+
+  $form['fae']['resource'] = array(
     '#type' => 'textfield',
     '#title' => t('Resource URI'),
     '#default_value' => $settings['resource'],
     '#description' => t('The Find an Expert resource URI query query for information. This should be the internal URI you obtain via the paperclip icon, not the browser URL when vieiwing a page on Find an Expert.'),
     '#required' => TRUE,
   );
-  $form['callback'] = array(
+  $form['fae']['callback'] = array(
     '#type' => 'select',
     '#title' => t('Resource type'),
     '#default_value' => $settings['callback'],
@@ -46,13 +66,15 @@ function uom_fae_blocks_block_configure($delta) {
     '#description' => t('The resource type determines how results are parsed and displayed.'),
     '#required' => TRUE,
   );
+
+  return $form;
 }
 
 /**
  * Implements hook_block_save().
  */
 function uom_fae_blocks_block_save($delta = '', $edit = array()) {
-  if (empty($edit['resource']) || !drupal_valid_url($edit['resource'], TRUE)) {
+  if (empty($edit['resource']) || !valid_url($edit['resource'], TRUE)) {
     drupal_set_message(t('The resource uri should contain a valid URL.'), 'error');
     return;
   }
@@ -73,14 +95,34 @@ function uom_fae_blocks_block_view($delta = '') {
   // Load settings for the specified block.
   $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults());
 
-  // Fetch the results *and* a theme wrapper.
-  $data = call_user_func($settings['callback'], $settings['resource']);
+  // Fetch data by calling the callback with the provided resource.
+  $content = call_user_func($settings['callback'], $settings['resource']);
+
+  // Return empty if no data - hides the block.
+  if (empty($content)) {
+    return array();
+  }
 
   // Output block HTML
   return array(
-    'subject' => t('FaE Block'),
-    'content' => theme($data['theme'], $data['result']),
+    'subject' => t('Find an Expert Block'),
+    'content' => $content,
   );
+}
+
+/**
+ * Settings form callback.
+ */
+function uom_fae_blocks_settings_form() {
+  $form['uom_fae_blocks'] = array(
+    '#title' => t('Number of blocks'),
+    '#description' => t(''),
+    '#type' => 'textfield',
+    '#size' => 3,
+    '#default_value' => variable_get('uom_fae_blocks', 1),
+    '#element_validate' => array('element_validate_integer_positive'),
+  );
+  return system_settings_form($form);
 }
 
 /**
@@ -89,7 +131,164 @@ function uom_fae_blocks_block_view($delta = '') {
 function uom_fae_blocks_defaults($delta = 0) {
   return array(
     'description' => t('Find an Expert Block: unconfigured @delta', array('@delta' => $delta)),
+    'callback' => '',
     'resource' => '',
-    'theme' => '',
   );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function uom_fae_blocks_theme() {
+  return array(
+    'uom_fae_blocks_research' => array(
+      'variables' => array(
+        'data' => array(),
+        'uri' => NULL,
+      ),
+    ),
+    'uom_fae_blocks_research_grant' => array(
+      'variables' => array(
+        'grant' => array(),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_uom_fae_api_callbacks().
+ */
+function uom_fae_blocks_uom_fae_api_callbacks() {
+  return array(
+    'uom_fae_blocks_research_current' => t('Current Research Grants'),
+    'uom_fae_blocks_research_past' => t('Past Research Grants'),
+  );
+}
+
+/**
+ * Callback that returns a themed current research grants list.
+ */
+function uom_fae_blocks_research_current($uri) {
+  $data = uom_fae_api_query(UOM_FAE_ORGANISATION_GRANTS_CURRENT, array(':uri' => $uri, ':year' => 1 + intval(date('Y')) ));
+
+  if (empty($data['rows'])) {
+    return NULL;
+  }
+
+  return theme('uom_fae_blocks_research', array('data' => $data['rows'], 'uri' => $uri));
+
+  // return t('%uri', array('%uri' => $uri));
+}
+
+/**
+ * Preprocessors for the FaE blocks.
+ */
+
+/**
+ * Implements template_preprocess_uom_fae_blocks_research().
+ */
+function template_preprocess_uom_fae_blocks_research(&$vars) {
+  $uri = $vars['uri'];
+  $research = $vars['data'];
+
+  // Init with empty variables.
+  $vars['research'] = $vars['year'] = $vars['schemes'] = array();
+
+  // Early return with empty vars if there are no items to process.
+  if (empty($research)) {
+    return;
+  }
+
+  foreach ($research as $grant) {
+    $id = $grant['grant'];
+
+    // Already processed, add an extra person only.
+    if (!empty($vars['research'][$id])) {
+      $vars['research'][$id]['people'][$grant['person']] = $grant['personLabel'];
+    }
+    else {
+      $startstamp = strtotime($grant['dateStart']);
+      $endstamp = strtotime($grant['dateEnd']);
+
+      $vars['research'][$id] = array(
+        'grant' => $grant['grantLabel'],
+        'link' => $grant['grant'],
+        'scheme' => $grant['grantScheme'],
+        'organisation' => $grant['orgLabel'],
+        'start' => (!empty($startstamp)) ? date('Y', $startstamp) : '',
+        'end' => (!empty($endstamp)) ? date('Y', $endstamp) : '',
+        'people' => array($grant['person'] => $grant['personLabel']),
+      );
+    }
+  }
+
+  // Do some grouping of research grants.
+  foreach ($vars['research'] as $id => $grant) {
+    $vars['grants'][] = $vars['schemes'][$grant['scheme']][] = $vars['year'][$grant['start']][] = theme('uom_fae_blocks_research_grant', array('grant' => $grant));
+  }
+
+  krsort($vars['year']);
+  ksort($vars['grants']);
+  ksort($vars['schemes']);
+}
+
+/**
+ * Theme functions for the FaE blocks.
+ */
+
+/**
+ * Implements theme_uom_fae_blocks_research().
+ *
+ * Theme a list of research grants.
+ */
+function theme_uom_fae_blocks_research($variables) {
+  $rows = array();
+  foreach($variables['year'][$year] as $year) {
+    foreach ($year as $row) {
+      $rows[] = array($row);
+    }
+  }
+  return theme('table', array('rows' => $rows));
+}
+
+/**
+ * This is what the current format is. Replicate for now, can change/override later.
+ *
+ * Project title: Media Treatment and Communication Needs of Sudanese Australians
+ * Sponsor name / Collaborator: Australian Research Council
+ * Scheme name: Linkage Projects
+ * Responsible CI and discipline: Dr David Nolan (Media and Communication)
+ * Dates: 2011 - 2013
+ */
+
+/**
+ * Implements theme_uom_fae_blocks_research_grant().
+ *
+ * Theme a single research grant.
+ */
+function theme_uom_fae_blocks_research_grant($variables) {
+  $grant = $variables['grant'];
+
+  $output = '<strong>' . t('Project title:') . '</strong> ' . check_plain(ucwords(strtolower($grant['grant'])));
+  if (!empty($grant['organisation'])) {
+    $output .= '<br /><strong>' . t('Sponsor name / Collaborator:') . '</strong> ' . check_plain(ucwords(strtolower($grant['organisation'])));
+  }
+  if (!empty($grant['scheme'])) {
+    $output .= '<br /><strong>' . t('Scheme name:') . '</strong> ' . check_plain($grant['scheme']);
+  }
+  if (!empty($grant['people'])) {
+    $people = array();
+    foreach ($grant['people'] as $uri => $label) {
+      $people[] = l($label, $uri);
+    }
+    $output .= '<br /><strong>' . t('Responsible CI:') . '</strong> ' . implode(', ', $people);
+  }
+  if (!empty($grant['start'])) {
+    $output .= '<br /><strong>' . t('Dates:') . '</strong> ' . $grant['start'];
+    if (!empty($grant['end'])) {
+      $output .= t(' - ') . $grant['end'];
+    }
+  }
+
+  return $output;
 }
