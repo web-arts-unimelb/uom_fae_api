@@ -95,6 +95,9 @@ function uom_fae_blocks_block_view($delta = '') {
   // Load settings for the specified block.
   $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults());
 
+  // Load the queries. They'll be handy, you know?
+  module_load_include('inc', 'uom_fae_blocks', 'uom_fae_blocks.queries');
+
   // Fetch data by calling the callback with the provided resource.
   $content = call_user_func($settings['callback'], $settings['resource']);
 
@@ -169,16 +172,34 @@ function uom_fae_blocks_uom_fae_api_callbacks() {
  * Callback that returns a themed current research grants list.
  */
 function uom_fae_blocks_research_current($uri) {
-  $data = uom_fae_api_query(UOM_FAE_ORGANISATION_GRANTS_CURRENT, array(':uri' => $uri, ':year' => 1 + intval(date('Y')) ));
+  $data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_GRANTS_CURRENT, array(
+    ':uri' => $uri,
+    ':dateEnd' => date('Y-12-31')
+  ));
 
   if (empty($data['rows'])) {
     return NULL;
   }
 
   return theme('uom_fae_blocks_research', array('data' => $data['rows'], 'uri' => $uri));
-
-  // return t('%uri', array('%uri' => $uri));
 }
+
+/**
+ * Callback that returns a themed past research grants list.
+ */
+function uom_fae_blocks_research_past($uri) {
+  $data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_GRANTS_PAST, array(
+    ':uri' => $uri,
+    ':dateEnd' => date('Y-12-31')
+  ));
+
+  if (empty($data['rows'])) {
+    return NULL;
+  }
+
+  return theme('uom_fae_blocks_research', array('data' => $data['rows'], 'uri' => $uri));
+}
+
 
 /**
  * Preprocessors for the FaE blocks.
@@ -188,29 +209,29 @@ function uom_fae_blocks_research_current($uri) {
  * Implements template_preprocess_uom_fae_blocks_research().
  */
 function template_preprocess_uom_fae_blocks_research(&$vars) {
-  $uri = $vars['uri'];
-  $research = $vars['data'];
-
-  // Init with empty variables.
-  $vars['research'] = $vars['year'] = $vars['schemes'] = array();
 
   // Early return with empty vars if there are no items to process.
-  if (empty($research)) {
+  if (empty($vars['data'])) {
     return;
   }
 
-  foreach ($research as $grant) {
+  $uri = $vars['uri'];
+
+  // Init with empty variables.
+  $research = $vars['research'] = array();
+
+  foreach ($vars['data'] as $grant) {
     $id = $grant['grant'];
 
     // Already processed, add an extra person only.
-    if (!empty($vars['research'][$id])) {
-      $vars['research'][$id]['people'][$grant['person']] = $grant['personLabel'];
+    if (!empty($research[$id])) {
+      $research[$id]['people'][$grant['person']] = $grant['personLabel'];
     }
     else {
       $startstamp = strtotime($grant['dateStart']);
       $endstamp = strtotime($grant['dateEnd']);
 
-      $vars['research'][$id] = array(
+      $research[$id] = array(
         'grant' => $grant['grantLabel'],
         'link' => $grant['grant'],
         'scheme' => $grant['grantScheme'],
@@ -222,14 +243,10 @@ function template_preprocess_uom_fae_blocks_research(&$vars) {
     }
   }
 
-  // Do some grouping of research grants.
-  foreach ($vars['research'] as $id => $grant) {
-    $vars['grants'][] = $vars['schemes'][$grant['scheme']][] = $vars['year'][$grant['start']][] = theme('uom_fae_blocks_research_grant', array('grant' => $grant));
+  // Theme each of the research-grant-with-people records.
+  foreach ($research as $id => $grant) {
+    $vars['research'][] = theme('uom_fae_blocks_research_grant', array('grant' => $grant));
   }
-
-  krsort($vars['year']);
-  ksort($vars['grants']);
-  ksort($vars['schemes']);
 }
 
 /**
@@ -243,10 +260,8 @@ function template_preprocess_uom_fae_blocks_research(&$vars) {
  */
 function theme_uom_fae_blocks_research($variables) {
   $rows = array();
-  foreach($variables['year'][$year] as $year) {
-    foreach ($year as $row) {
-      $rows[] = array($row);
-    }
+  foreach($variables['research'] as $row) {
+    $rows[] = array($row);
   }
   return theme('table', array('rows' => $rows));
 }
@@ -269,7 +284,7 @@ function theme_uom_fae_blocks_research($variables) {
 function theme_uom_fae_blocks_research_grant($variables) {
   $grant = $variables['grant'];
 
-  $output = '<strong>' . t('Project title:') . '</strong> ' . check_plain(ucwords(strtolower($grant['grant'])));
+  $output = '<strong>' . t('Project title:') . '</strong> <em>' . check_plain(ucwords(strtolower($grant['grant']))) . '</em>';
   if (!empty($grant['organisation'])) {
     $output .= '<br /><strong>' . t('Sponsor name / Collaborator:') . '</strong> ' . check_plain(ucwords(strtolower($grant['organisation'])));
   }
