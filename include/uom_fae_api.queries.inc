@@ -14,6 +14,8 @@ PREFIX ouext: <http://oracle.com/semtech/jena-adaptor/ext/user-def-function#>
 PREFIX oext:  <http://oracle.com/semtech/jena-adaptor/ext/function#>
 PREFIX ORACLE_SEM_FS_NS: <http://oracle.com/semtech#timeout=:timeout,qid=:qid,STRICT_DEFAULT=F,GRAPH_MATCH_UNNAMED=T>
 PREFIX fae:   <http://www.findanexpert.unimelb.edu.au/ontology/>
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX vitro-public: <http://vitro.mannlib.cornell.edu/ns/vitro/public#>
 PREFIX vivo:  <http://vivoweb.org/ontology/core#>
 PREFIX bibo:  <http://purl.org/ontology/bibo/>
 PREFIX foaf:  <http://xmlns.com/foaf/0.1/>');
@@ -60,8 +62,9 @@ WHERE {
   OPTIONAL { <:uri> vivo:phoneNumber ?phone. }
   OPTIONAL { <:uri> fae:availableForSupervision ?supervisor. }
   OPTIONAL {
-    <:uri> fae:mainImage ?file.
-    ?file fae:downloadLocation ?image.
+    <:uri> vitro-public:mainImage ?file.
+    ?file vitro-public:thumbnailImage ?thumbnail.
+    ?file vitro-public:downloadLocation ?image.
   }
   OPTIONAL {
     <:uri> fae:hasWorkLocation ?location.
