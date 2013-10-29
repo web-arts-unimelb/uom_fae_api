@@ -23,8 +23,17 @@ function uom_fae_api_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('uom_fae_api_admin_form'),
     'access arguments' => array('administer uom fae api'),
-    'type' => MENU_NORMAL_ITEM,
     'file' => 'uom_fae_api.admin.inc',
+  );
+  $items['admin/config/services/uom-fae/api'] = array(
+    'title' => t('Find an Expert API'),
+    'description' => t('Configure the Find an Expert API.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('uom_fae_api_admin_form'),
+    'access arguments' => array('administer uom fae api'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'uom_fae_api.admin.inc',
+    'weight' => -10,
   );
   return $items;
 }
@@ -53,11 +62,7 @@ function uom_fae_api_person_overview($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_OVERVIEW, $args);
 
-  if (empty($result['rows'])) {
-    return t('Empty');
-  }
-	
-  return $result['rows'][0];
+  return (!empty($result['rows'])) ? $result['rows'][0] : t('Empty');
 }
 
 /**
@@ -71,11 +76,7 @@ function uom_fae_api_person_affiliation($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_AFFILIATION, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -90,11 +91,7 @@ function uom_fae_api_person_publications($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_PUBLICATIONS, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -109,11 +106,7 @@ function uom_fae_api_person_research($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_RESEARCH, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -128,12 +121,9 @@ function uom_fae_api_person_awards($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_AWARDS, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
+
 /**
  * Return a person's linkages.
  */
@@ -146,11 +136,7 @@ function uom_fae_api_person_linkages($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_LINKAGES, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'];
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
 
 /**
@@ -165,11 +151,7 @@ function uom_fae_api_person_supervision($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_SUPERVISION, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'][0];
+  return (!empty($result['rows'])) ? $result['rows'][0] : NULL;
 }
 
 /**
@@ -184,12 +166,24 @@ function uom_fae_api_person_contact($uri, $args = array()) {
 
   $result = uom_fae_api_query(UOM_FAE_PERSON_CONTACT, $args);
 
-  if (empty($result['rows'])) {
-    return NULL;
-  }
-
-  return $result['rows'][0];
+  return (!empty($result['rows'])) ? $result['rows'][0] : NULL;
 }
+
+/**
+ * Return research grants for a given organisation.
+ */
+function uom_fae_api_organisation_research($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_ORGANISATION_GRANTS, $args);
+
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
+}
+
 
 /**
  * Implements hook_uom_fae_api_query_alter().
@@ -251,4 +245,28 @@ function uom_fae_api_query($query, $args = array()) {
 
   // Return the result.
   return $result['result'];
+}
+
+/**
+ * Return a list of all callbacks defined via hook_uom_fae_api_callbacks().
+ */
+function uom_fae_api_callbacks() {
+  $callbacks = &drupal_static(__FUNCTION__);
+
+  if (!empty($callbacks)) {
+    return $callbacks;
+  }
+
+  $module_info = system_get_info('module');
+
+  // Get list of callbacks.
+  foreach (module_implements('uom_fae_api_callbacks') as $module) {
+    $functions = module_invoke($module, 'uom_fae_api_callbacks');
+    foreach ($functions as $function => $name) {
+      $callbacks[$module_info[$module]['name']][$function] = check_plain($name);
+    }
+  }
+
+  ksort($callbacks);
+  return $callbacks;
 }

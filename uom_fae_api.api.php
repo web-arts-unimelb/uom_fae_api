@@ -5,6 +5,13 @@
  */
 
 /**
+ * @defgroup uom_fae_api_hooks Find an Expert API hooks
+ * @{
+ * Hooks that can be implemented by other modules in order to implement the
+ * Find an Expert API.
+ */
+
+/**
  * Allows the query and query args to be modified.
  *
  * This hook is executed before the query args are replaced into the
@@ -39,3 +46,44 @@ function hook_uom_fae_api_query_alter(&$query, &$args) {
 function hook_uom_fae_api_query_result_alter(&$result) {
   unset($result['result']['rows'][0]);
 }
+
+/**
+ * Describes callback functions to Find an Expert API.
+ *
+ * @return
+ *   An associative array describing the callback functions. Primary key is
+ *   the name of the function that should be called to retrieve and theme
+ *   data from Find an Expert. The value for the key entry is a translated
+ *   string describing the callback function.
+ */
+function hook_uom_fae_api_callbacks() {
+  $callbacks['uom_fae_api_research'] = t('Research Grants');
+  return $callbacks;
+}
+
+/**
+ * @}
+ */
+
+/**
+ * @TODO: Add examples.
+ *
+ * @defgroup uom_fae_api About UoM FaE API
+ * @{
+ * @TODO: Explanation
+ *
+ * @code
+ * function mymodule_uom_fae_api_callbacks(() {
+ *   return array('mymodule_expert_info' => t('Information about a person'));
+ * }
+ *
+ * function mymodule_expert_info() {
+ *   $query = ...;
+ *
+ *   $data = uom_fae_api_query($query, $args);
+ *   return theme('mymodule_theme_hook, $data['result']);
+ * }
+ * @endcode
+ *
+ * @}
+ */
