@@ -54,7 +54,7 @@ WHERE {
  */
 define('UOM_FAE_PERSON_CONTACT', '
 SELECT
-  ?image ?email ?phone ?room ?building ?supervisor
+  ?email ?phone ?room ?building ?supervisor ?thumbnail ?image
 WHERE {
   <:uri> rdf:type vivo:FacultyMember.
   OPTIONAL { <:uri> vivo:email ?email. }
