@@ -1,6 +1,6 @@
 name = Find an Expert API
 description = Use SparQL to expose Find an Expert data on your Drupal site.
 core = 7.x
-
 package = University of Melbourne
+configure = admin/config/services/uom-fae
 dependencies[] = sparql
