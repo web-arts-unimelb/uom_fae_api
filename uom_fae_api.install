@@ -4,6 +4,15 @@
  */
 
 /**
+ * Implements hook_schema().
+ */
+function uom_fae_api_schema() {
+  schema = array();
+  $schema['cache_uom_fae_api'] = drupal_get_schema_unprocessed('system', 'cache');
+  return $schema;
+}
+
+/**
  * Implements hook_uninstall().
  */
 function uom_fae_api_uninstall() {
@@ -11,4 +20,12 @@ function uom_fae_api_uninstall() {
   variable_del('uom_fae_api_timeout');
   variable_del('uom_fae_api_qid');
   variable_del('uom_fae_api_cache');
+}
+
+/**
+ * Create a cache for Find an Expert queries.
+ */
+function uom_fae_api_update_7000() {
+  drupal_install_schema('uom_fae_api');
+  return t('Created a cache for the Find an Expert API.');
 }

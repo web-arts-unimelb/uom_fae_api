@@ -10,8 +10,41 @@ define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 module_load_include('inc', 'uom_fae_api', 'include/uom_fae_api.queries');
 
 /**
- * Implements hook_permission().
+ * Implements hook_flush_caches().
  */
+function uom_fae_api_flush_caches() {
+  return array('cache_uom_fae_api');
+}
+
+/**
+ * Implements hook_admin_menu_cache_info().
+ */
+function uom_fae_api_admin_menu_cache_info() {
+  $caches['update'] = array(
+    'title' => t('Find an Expert queries'),
+    'callback' => '_uom_fae_api_cache_clear',
+  );
+  return $caches;
+}
+
+/**
+ * Callback to clear the uom_fae_api cache.
+ */
+function _uom_fae_api_cache_clear($cid = NULL, $wildcard = FALSE) {
+  if (empty($cid)) {
+    db_delete('cache_cache_uom_fae_api')->execute();
+  }
+  else {
+    $query = db_delete('cache_uom_fae_api');
+    if ($wildcard) {
+      $query->condition('cid', $cid . '%', 'LIKE');
+    }
+    else {
+      $query->condition('cid', $cid);
+    }
+    $query->execute();
+  }
+}
 
 /**
  * Implements hook_menu().
@@ -35,6 +68,7 @@ function uom_fae_api_menu() {
     'file' => 'uom_fae_api.admin.inc',
     'weight' => -10,
   );
+
   return $items;
 }
 
@@ -225,7 +259,7 @@ function uom_fae_api_query($query, $args = array()) {
   // Now that we have a full query, check if there is a cached result for it
   // and load that. Then continue, so that the alter hooks are called.
   $hash = md5($query);
-  if ($period && $cache = cache_get('uom_fae_api:' . $hash)) {
+  if ($period && $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api')) {
     $result = $cache->data;
   }
   else {
@@ -236,7 +270,7 @@ function uom_fae_api_query($query, $args = array()) {
     }
     elseif ($period) {
       // Caching is enabled, throw the result into the cache!
-      cache_set('uom_fae_api:' . $hash, $result, 'cache', time() + $period);
+      cache_set('uom_fae_api:' . $hash, $result, 'cache_uom_fae_api', time() + $period);
     }
   }
 
