@@ -7,7 +7,7 @@
  * Implements hook_schema().
  */
 function uom_fae_api_schema() {
-  schema = array();
+  $schema = array();
   $schema['cache_uom_fae_api'] = drupal_get_schema_unprocessed('system', 'cache');
   return $schema;
 }
