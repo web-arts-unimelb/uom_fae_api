@@ -20,7 +20,9 @@ function uom_fae_api_flush_caches() {
  * Implements hook_admin_menu_cache_info().
  */
 function uom_fae_api_admin_menu_cache_info() {
-  $caches['update'] = array(
+	// http://api.drupalize.me/api/drupal/function/hook_admin_menu_cache_info/7
+	// Return an associative array whose keys denote internal identifiers for a particular caches (which can be freely defined, but should be in a module's namespace) and whose values are associative arrays containing
+  $caches['uom_fae_api_update'] = array(
     'title' => t('Find an Expert queries'),
     'callback' => '_uom_fae_api_cache_clear',
   );
