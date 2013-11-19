@@ -352,10 +352,3 @@ function uom_fae_api_publication_types($key = NULL) {
 
   return (empty($key)) ? $types : $types[$key];
 }
-
-/**
- * Sort authors by rank.
- */
-function _uom_fae_blocks_peoplesort($a, $b) {
-  return intval($a) > intval($b);
-}
