@@ -66,6 +66,13 @@ function uom_fae_blocks_block_configure($delta) {
     '#description' => t('The resource type determines how results are parsed and displayed.'),
     '#required' => TRUE,
   );
+  $form['fae']['arguments'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Callback arguments'),
+    '#default_value' => implode(', ', $settings['arguments']),
+    '#description' => t('Any arguments that should be passed to the resource callback. Separate multiple arguments with commas.'),
+    '#required' => FALSE,
+  );
 
   return $form;
 }
@@ -79,10 +86,18 @@ function uom_fae_blocks_block_save($delta = '', $edit = array()) {
     return;
   }
 
+  if (strpos($edit['arguments'], ',') === FALSE) {
+    $arguments = array($edit['arguments']);
+  }
+  else {
+    $arguments = explode(',', $edit['arguments']);
+  }
+
   $settings = array(
     'description' => $edit['description'],
     'resource' => $edit['resource'],
     'callback' => $edit['callback'],
+    'arguments' => $arguments,
   );
 
   variable_set('uom_fae_blocks_' . $delta, $settings);
@@ -98,8 +113,10 @@ function uom_fae_blocks_block_view($delta = '') {
   // Load the queries. They'll be handy, you know?
   module_load_include('inc', 'uom_fae_blocks', 'uom_fae_blocks.queries');
 
-  // Fetch data by calling the callback with the provided resource.
-  $content = call_user_func($settings['callback'], $settings['resource']);
+  // Merge any optional arguments into the callback params.
+  $arguments = array_merge(array($settings['resource']), $settings['arguments']);
+
+  $content = call_user_func_array($settings['callback'], $arguments);
 
   // Return empty if no data - hides the block.
   if (empty($content)) {
@@ -136,6 +153,7 @@ function uom_fae_blocks_defaults($delta = 0) {
     'description' => t('Find an Expert Block: unconfigured @delta', array('@delta' => $delta)),
     'callback' => '',
     'resource' => '',
+    'arguments' => array(),
   );
 }
 
@@ -144,6 +162,12 @@ function uom_fae_blocks_defaults($delta = 0) {
  */
 function uom_fae_blocks_theme() {
   return array(
+    'uom_fae_blocks_person' => array(
+      'variables' => array(
+        'name' => $label,
+        'href' => $uri,
+      ),
+    ),
     'uom_fae_blocks_research' => array(
       'variables' => array(
         'data' => array(),
@@ -216,20 +240,22 @@ function uom_fae_blocks_research_past($uri) {
  * Callback that returns a themed list of publications for a given year.
  */
 function uom_fae_blocks_publications($uri) {
+  $args = func_get_args();
+
   $currYear = intval(date('Y'));
 
-  // Grab a year argument from the query string and sanitise it.
-  if (!empty($_GET['year'])) {
-    $year = intval($_GET['year']);
+  // Grab a year argument from the callback string and sanitise it.
+  if (!empty($args[1])) {
+    $year = intval($args[1]);
     if (!empty($year) && $year > 0 && $year <= $currYear) {
       $currYear = $year;
     }
   }
 
-  $data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_GRANTS_CURRENT, array(
+  $data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
     ':uri' => $uri,
-    ':currYear' => sprintf("%04d-01-01", $currYear),
-    ':prevYear' => sprintf("%04d-01-01", ($currYear - 1)),
+    ':currYear' => sprintf("%04d", $currYear + 1),
+    ':prevYear' => sprintf("%04d", ($currYear)),
   ));
 
   if (empty($data['rows'])) {
@@ -288,6 +314,13 @@ function template_preprocess_uom_fae_blocks_research(&$vars) {
 }
 
 /**
+  A1 - Authored Research Books 
+
+  Apperley TH. 2010. Gaming rhythms: Play and counterplay from the situated to the global. Amsterdam, Netherlands: Institute of Network Cultures. 
+  Yue A. 2010. Ann Hui's Song of the Exile. Hong Kong: Hong Kong University Press. 
+*/
+
+/**
  * Implements template_preprocess_uom_fae_blocks_publications().
  */
 function template_preprocess_uom_fae_blocks_publications(&$vars) {
@@ -300,13 +333,40 @@ function template_preprocess_uom_fae_blocks_publications(&$vars) {
   $uri = $vars['uri'];
 
   // Init with empty variables.
-  $publications = $vars['publications'] = array();
+  $publications = $vars['publications'] = $vars['categories'] = array();
 
   foreach ($vars['data'] as $publication) {
-    $id = $publication['publication'];
+    $id = $publication['article'];
+
+    $date = strtotime($publication['dateValue']);
+
+    // Already processed, add an extra person only.
+    if (!empty($publications[$id])) {
+      $publications[$id]['people'][$publication['authorRank']] = array($publication['person'] => $publication['authorName']);
+    }
+    else {
+      $publications[$id] = array(
+        'title'     => $publication['title'],
+        'link'      => $publication['article'],
+        'type'      =>  _uom_fae_blocks_publication_type($publication['type']),
+        'people'    => array($publication['authorRank'] => array($publication['person'] => $publication['authorName'])),
+        'date'      => (!empty($date)) ? date('Y', $date) : '',
+        'publisher' => $publication['publishOrg'],
+        'start'     => (!empty($publication['pageStart'])) ? $publication['pageStart'] : '',
+        'end'       => (!empty($publication['pageEnd'])) ? $publication['pageEnd'] : '',
+        'edition'   => (!empty($publication['edition'])) ? $publication['edition'] : '',
+        'isbn13'    => (!empty($publication['isbn13'])) ? $publication['isbn13'] : '',
+        'volume'    => (!empty($publication['volume'])) ? $publication['volume'] : '',
+      );
+    }
   }
 
-  $type = _uom_fae_blocks_publication_type($uri);
+  // Theme each of the publication-with-people records.
+  foreach ($publications as $id => &$publication) {
+    uksort($publication['people'], "_uom_fae_blocks_peoplesort");
+    $vars['publications'][] = theme('uom_fae_blocks_publication', array('publication' => $publication));
+    $vars['categories'][$publication['type']][] = theme('uom_fae_blocks_publication', array('publication' => $publication));
+  }
 }
 
 /**
@@ -354,7 +414,7 @@ function theme_uom_fae_blocks_research_grant($variables) {
   if (!empty($grant['people'])) {
     $people = array();
     foreach ($grant['people'] as $uri => $label) {
-      $people[] = l($label, $uri);
+      $people[] = theme('uom_fae_blocks_person', array('name' => $label, 'href' => $uri));
     }
     $output .= '<br /><strong>' . t('Responsible CI:') . '</strong> ' . implode(', ', $people);
   }
@@ -374,27 +434,90 @@ function theme_uom_fae_blocks_research_grant($variables) {
  * Theme a list of publications.
  */
 function theme_uom_fae_blocks_publications($variables) {
+  $output = '';
   $rows = array();
-  foreach($variables['publications'] as $row) {
-    $rows[] = array($row);
+
+  foreach($variables['categories'] as $category => $publications) {
+    $output .= theme('item_list', array('items' => $publications, 'title' =>  $category));
   }
-  return theme('table', array('rows' => $rows));
+  return $output;
+}
+
+/**
+ * Implements theme_uom_fae_blocks_publication().
+ *
+ * Theme a single publication.
+ *
+ * Yue A. 2010. Ann Hui's Song of the Exile. Hong Kong: Hong Kong University Press.·
+ */
+function theme_uom_fae_blocks_publication($variables) {
+  $output = '';
+  $publication = $variables['publication'];
+
+  $people = array();
+  foreach ($publication['people'] as $person) {
+    foreach ($person as $uri => $name) {
+      $people[] = theme('uom_fae_blocks_person', array('name' => $name, 'href' => $uri));
+    }
+  }
+
+  $output .= implode(', ', $people) . '.';
+  if (!empty($publication['date'])) {
+    $output .= ' ' . $publication['date'] . '.';
+  }
+  $output .= ' <em>' . trim($publication['title']) . '.</em>';
+
+  if (!empty($publication['publisher'])) {
+    $output .= ' ' . $publication['publisher'] . '.';
+  }
+  if (!empty($publication['start'])) {
+    $output .= ' pp. ' . $publication['start'];
+    if (!empty($publication['end'])) {
+      $output .= '-' . $publication['end'];
+    }
+  }
+  return $output;
+}
+
+function theme_uom_fae_blocks_person($variables) {
+  $name = $variables['name'];
+  $href = $variables['href'];
+
+  $efq = new EntityFieldQuery();
+  $entities = $efq
+    ->entityCondition('entity_type', 'user')
+    ->propertyCondition('status', 1)
+    ->fieldCondition('field_fae_resource', 'url',  $href, '=')
+    ->execute();
+
+  $uid = array_keys($entities['user']);
+  if (!empty($uid)) {
+    return l($name, 'user/' . $uid[0]);
+  }
+  return l($name, $href);
 }
 
 /**
  * Turn a publication type URI into a label.
  */
 function _uom_fae_blocks_publication_type($uri) {
-  $output = '';
-
   // Early return.
   if (empty($uri)) {
-    return $output;
+    return t('Other Works');
   }
 
+  // The final two characters of the publication type uri match our array.
+  $type = substr($uri, strlen('http://www.findanexpert.unimelb.edu.au/ontology/PublicationType'));
+  return _uom_fae_blocks_publication_types($type);
+}
+
+/**
+ * Helper for quick access to pub types.
+ */
+function _uom_fae_blocks_publication_types($key = NULL) {
   $types = array(
-    'A1' => t('Authored-Research'),
-    'A2' => t('Edited'),
+    'A1' => t('Authored Research Book'),
+    'A2' => t('Edited Book'),
     'A3' => t('Revision/New Edition'),
     'A4' => t('Translated Book'),
     'A5' => t('Text Book'),
@@ -413,12 +536,20 @@ function _uom_fae_blocks_publication_type($uri) {
     'F2' => t('Fully written unrefereed paper'),
     'G4' => t('Major Reports and Working Papers'),
     'G5' => t('Minor Reports and Working Papers'),
+    'Ji' => t('Creative Published Works'),
+    'J6' => t('Minor Published Works'),
+    'J8' => t('Minor Exhibited works'),
+    'J11' => t('Major Published Works'),
+    'J13' => t('Major Exhibited works'),
+    '' => 'Other works',
   );
 
-  // The final two characters of the publication type uri match our array.
-  $type = substr($uri, -1, 2);
-  if (!empty($types[$type])) {
-    $output = $types[$type];
-  }
-  return $output;
+  return (empty($key)) ? $types : $types[$key];
+}
+
+/**
+ * Sort authors by rank.
+ */
+function _uom_fae_blocks_peoplesort($a, $b) {
+  return intval($a) > intval($b);
 }
