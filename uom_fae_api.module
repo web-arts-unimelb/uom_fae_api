@@ -306,3 +306,56 @@ function uom_fae_api_callbacks() {
   ksort($callbacks);
   return $callbacks;
 }
+
+/**
+ * Helper for quick access to publication types.
+ */
+function uom_fae_api_publication_types($key = NULL) {
+  $types = array(
+    'A1'  => t('Authored Research Book'),
+    'A2'  => t('Edited Book'),
+    'A3'  => t('Revision/New Edition'),
+    'A4'  => t('Translated Book'),
+    'A5'  => t('Text Book'),
+    'A6'  => t('Authored Book (Other)'),
+    'B1'  => t('Chapter in Research Book'),
+    'B2'  => t('Chapters in Books (Other)'),
+    'C1'  => t('Article in scholarly refereed journal'),
+    'C2'  => t('Article in unrefereed journal (including articles in professional journals)'),
+    'C3'  => t('Unrefereed Letter or Note'),
+    'C5'  => t('Other refereed contribution to a refereed journal'),
+    'D4'  => t('Major Reference work'),
+    'E1'  => t('Editorship (incl. Chief, Assoc. and other Editorial Roles)'),
+    'E2'  => t('Editorial Board Member'),
+    'E3'  => t('Guest Editor'),
+    'F1'  => t('Fully written refereed paper'),
+    'F2'  => t('Fully written unrefereed paper'),
+    'G4'  => t('Major Reports and Working Papers'),
+    'G5'  => t('Minor Reports and Working Papers'),
+    'H11' => t('Refereed Design Award'),
+    'H12' => t('Major curated individual exhibition of an original design'),
+    'I1'  => t('Patent'),
+    'Ji'  => t('Creative Published Works'),
+    'J6'  => t('Minor original creative published work'),
+    'J7'  => t('Minor original creative recorded work'),
+    'J8'  => t('Minor exhibition of original art or design'),
+    'J11' => t('Major original creative published work'),
+    'J11' => t('Major original creative recorded work'),
+    'J13' => t('Major curated individual exhibition of original art'),
+    'M5'  => t('Computer software'),
+    'N4'  => t('Audio-visual recording'),
+    'P1'  => t('Major performance'),
+    'P2'  => t('Minor performance'),
+    'R11' => t('Thesis passed for a higher degree'),
+    'R12' => t('Thesis in progress for a higher degree'),
+  );
+
+  return (empty($key)) ? $types : $types[$key];
+}
+
+/**
+ * Sort authors by rank.
+ */
+function _uom_fae_blocks_peoplesort($a, $b) {
+  return intval($a) > intval($b);
+}
