@@ -69,3 +69,62 @@ WHERE {
 }
 
 ORDER BY DESC(?dateTimeEnd) ASC(?dateTimeStart)');
+
+/**
+ * Publications by people associated with a given organisation.
+ */
+define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
+SELECT
+  ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?prefixAnnot
+WHERE {
+  ?person vivo:personInPosition ?position .
+  ?position vivo:positionInOrganization <http://www.findanexpert.unimelb.edu.au/individual/org94> .
+  <:uri> rdfs:label ?orgLabel .
+  ?position rdfs:label ?positionLabel .
+  ?person rdfs:label ?personLabel .
+
+  ?person vivo:authorInAuthorship ?authorship .
+  ?authorship vivo:linkedInformationResource ?article .
+  ?article rdfs:label ?title .
+  ?article rdf:type ?type .
+  ?article fae:parentTitle ?parentTitle .
+
+  ?article vivo:dateTimeValue ?dateTimeValue .
+  ?dateTimeValue vivo:dateTime ?dateValue .
+
+  ?article vivo:publisher ?publisher .
+  ?publisher rdfs:label ?publishOrg .
+
+  OPTIONAL {
+    ?article vivo:hasPublicationVenue ?pubVenue .
+    ?pubVenue rdfs:label ?publication .
+  }
+  OPTIONAL {
+    ?article bibo:doi ?doi
+  }
+  OPTIONAL {
+    ?article bibo:pageStart ?pageStart
+  }
+  OPTIONAL {
+    ?article bibo:pageEnd ?pageEnd
+  }
+  OPTIONAL {
+    ?article bibo:edition ?edition
+  }
+  OPTIONAL {
+    ?article bibo:isbn13 ?isbn13
+  }
+  OPTIONAL {
+    ?article bibo:volume ?volume
+  }
+
+  OPTIONAL {
+    ?type fae:type ?prefixAnnot .
+  }
+
+  FILTER (?dateValue >= ":prevYear-01-01T00:00:00Z"^^xsd:dateTime)
+  FILTER (?dateValue  < ":currYear-01-01T00:00:00Z"^^xsd:dateTime)
+  FILTER regex(?type, "findanexpert")
+}
+
+ORDER BY ASC(?title)');

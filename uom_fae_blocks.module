@@ -155,6 +155,17 @@ function uom_fae_blocks_theme() {
         'grant' => array(),
       ),
     ),
+    'uom_fae_blocks_publications' => array(
+      'variables' => array(
+        'data' => array(),
+        'uri' => NULL,
+      ),
+    ),
+    'uom_fae_blocks_publication' => array(
+      'variables' => array(
+        'publication' => array(),
+      ),
+    ),
   );
 }
 
@@ -163,8 +174,9 @@ function uom_fae_blocks_theme() {
  */
 function uom_fae_blocks_uom_fae_api_callbacks() {
   return array(
-    'uom_fae_blocks_research_current' => t('Current Research Grants'),
-    'uom_fae_blocks_research_past' => t('Past Research Grants'),
+    'uom_fae_blocks_research_current' => t('Organisation: Current research grants'),
+    'uom_fae_blocks_research_past' => t('Organisation: Past research grants'),
+    'uom_fae_blocks_publications' => t('Organisation: Publications by year'),
   );
 }
 
@@ -200,6 +212,32 @@ function uom_fae_blocks_research_past($uri) {
   return theme('uom_fae_blocks_research', array('data' => $data['rows'], 'uri' => $uri));
 }
 
+/**
+ * Callback that returns a themed list of publications for a given year.
+ */
+function uom_fae_blocks_publications($uri) {
+  $currYear = intval(date('Y'));
+
+  // Grab a year argument from the query string and sanitise it.
+  if (!empty($_GET['year'])) {
+    $year = intval($_GET['year']);
+    if (!empty($year) && $year > 0 && $year <= $currYear) {
+      $currYear = $year;
+    }
+  }
+
+  $data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_GRANTS_CURRENT, array(
+    ':uri' => $uri,
+    ':currYear' => sprintf("%04d-01-01", $currYear),
+    ':prevYear' => sprintf("%04d-01-01", ($currYear - 1)),
+  ));
+
+  if (empty($data['rows'])) {
+    return NULL;
+  }
+
+  return theme('uom_fae_blocks_publications', array('data' => $data['rows'], 'uri' => $uri));
+}
 
 /**
  * Preprocessors for the FaE blocks.
@@ -247,6 +285,28 @@ function template_preprocess_uom_fae_blocks_research(&$vars) {
   foreach ($research as $id => $grant) {
     $vars['research'][] = theme('uom_fae_blocks_research_grant', array('grant' => $grant));
   }
+}
+
+/**
+ * Implements template_preprocess_uom_fae_blocks_publications().
+ */
+function template_preprocess_uom_fae_blocks_publications(&$vars) {
+
+  // Early return with empty vars if there are no items to process.
+  if (empty($vars['data'])) {
+    return;
+  }
+
+  $uri = $vars['uri'];
+
+  // Init with empty variables.
+  $publications = $vars['publications'] = array();
+
+  foreach ($vars['data'] as $publication) {
+    $id = $publication['publication'];
+  }
+
+  $type = _uom_fae_blocks_publication_type($uri);
 }
 
 /**
@@ -305,5 +365,60 @@ function theme_uom_fae_blocks_research_grant($variables) {
     }
   }
 
+  return $output;
+}
+
+/**
+ * Implements theme_uom_fae_blocks_publications().
+ *
+ * Theme a list of publications.
+ */
+function theme_uom_fae_blocks_publications($variables) {
+  $rows = array();
+  foreach($variables['publications'] as $row) {
+    $rows[] = array($row);
+  }
+  return theme('table', array('rows' => $rows));
+}
+
+/**
+ * Turn a publication type URI into a label.
+ */
+function _uom_fae_blocks_publication_type($uri) {
+  $output = '';
+
+  // Early return.
+  if (empty($uri)) {
+    return $output;
+  }
+
+  $types = array(
+    'A1' => t('Authored-Research'),
+    'A2' => t('Edited'),
+    'A3' => t('Revision/New Edition'),
+    'A4' => t('Translated Book'),
+    'A5' => t('Text Book'),
+    'A6' => t('Authored Book (Other)'),
+    'B1' => t('Chapter in Research Book'),
+    'B2' => t('Chapters in Books (Other)'),
+    'C1' => t('Article in scholarly refereed journal'),
+    'C2' => t('Article in unrefereed journal (including articles in professional journals)'),
+    'C3' => t('Letter or Note'),
+    'C5' => t('Other contribution to a refereed journal'),
+    'D4' => t('Major Reference work'),
+    'E1' => t('Editorship (incl. Chief, Assoc. and other Editorial Roles)'),
+    'E2' => t('Editorial Board Member'),
+    'E3' => t('Guest Editor'),
+    'F1' => t('Fully written refereed paper'),
+    'F2' => t('Fully written unrefereed paper'),
+    'G4' => t('Major Reports and Working Papers'),
+    'G5' => t('Minor Reports and Working Papers'),
+  );
+
+  // The final two characters of the publication type uri match our array.
+  $type = substr($uri, -1, 2);
+  if (!empty($types[$type])) {
+    $output = $types[$type];
+  }
   return $output;
 }
