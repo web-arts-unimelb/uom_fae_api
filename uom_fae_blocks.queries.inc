@@ -75,15 +75,18 @@ ORDER BY DESC(?dateTimeEnd) ASC(?dateTimeStart)');
  */
 define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
 SELECT
-  ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?prefixAnnot
+  ?authorName ?authorRank ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?type
 WHERE {
   ?person vivo:personInPosition ?position .
   ?position vivo:positionInOrganization <http://www.findanexpert.unimelb.edu.au/individual/org94> .
   <:uri> rdfs:label ?orgLabel .
   ?position rdfs:label ?positionLabel .
   ?person rdfs:label ?personLabel .
-
   ?person vivo:authorInAuthorship ?authorship .
+
+  ?authorship vivo:authorNameAsListed ?authorName .
+  ?authorship vivo:authorRank ?authorRank .
+
   ?authorship vivo:linkedInformationResource ?article .
   ?article rdfs:label ?title .
   ?article rdf:type ?type .
@@ -118,13 +121,9 @@ WHERE {
     ?article bibo:volume ?volume
   }
 
-  OPTIONAL {
-    ?type fae:type ?prefixAnnot .
-  }
-
   FILTER (?dateValue >= ":prevYear-01-01T00:00:00Z"^^xsd:dateTime)
   FILTER (?dateValue  < ":currYear-01-01T00:00:00Z"^^xsd:dateTime)
   FILTER regex(?type, "findanexpert")
 }
 
-ORDER BY ASC(?title)');
+ORDER BY ASC(?title) ASC(?authorRank)');
