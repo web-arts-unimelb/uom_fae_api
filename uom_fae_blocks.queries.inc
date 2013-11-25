@@ -78,7 +78,7 @@ SELECT
   ?authorName ?authorRank ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?type
 WHERE {
   ?person vivo:personInPosition ?position .
-  ?position vivo:positionInOrganization <http://www.findanexpert.unimelb.edu.au/individual/org94> .
+  ?position vivo:positionInOrganization <:uri> .
   <:uri> rdfs:label ?orgLabel .
   ?position rdfs:label ?positionLabel .
   ?person rdfs:label ?personLabel .
