@@ -110,11 +110,21 @@ function uom_fae_blocks_block_view($delta = '') {
   // Load settings for the specified block.
   $settings = variable_get('uom_fae_blocks_' . $delta, uom_fae_blocks_defaults());
 
+  // Early return if there is no FaE resource.
+  if (empty($settings['resource'])) {
+    return array();
+  }
+
   // Load the queries. They'll be handy, you know?
   module_load_include('inc', 'uom_fae_blocks', 'uom_fae_blocks.queries');
 
+  // Add the resource to the callback arguments array.
+  $arguments = array($settings['resource']);
+
   // Merge any optional arguments into the callback params.
-  $arguments = array_merge(array($settings['resource']), $settings['arguments']);
+  if (!empty($settings['arguments'])) {
+    $arguments = array_merge($arguments, $settings['arguments']);
+  }
 
   $content = call_user_func_array($settings['callback'], $arguments);
 
