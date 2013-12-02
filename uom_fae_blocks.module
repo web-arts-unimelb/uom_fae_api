@@ -500,9 +500,11 @@ function theme_uom_fae_blocks_person($variables) {
     ->fieldCondition('field_fae_resource', 'url',  $href, '=')
     ->execute();
 
-  $uid = array_keys($entities['user']);
-  if (!empty($uid)) {
-    return l($name, 'user/' . $uid[0]);
+  if (!empty($entities['user'])) {
+    $uid = array_keys($entities['user']);
+    if (!empty($uid)) {
+      return l($name, 'user/' . $uid[0]);
+    }
   }
   return l($name, $href);
 }
