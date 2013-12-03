@@ -234,3 +234,26 @@ WHERE {
     ?person rdfs:label ?personLabel .
   }
 }');
+
+/*
+ * Fetch qualification information for a specific person.
+ */
+define('UOM_FAE_PERSON_QUALIFICATIONS', '
+SELECT
+  ?orgLabel ?degreeLabel ?dateEnd
+WHERE {
+  ?training vivo:educationalTrainingOf <:uri> .
+
+  ?training vivo:trainingAtOrganization ?org .
+  ?training vivo:degreeEarned ?degree .
+  ?training vivo:dateTimeInterval ?dateTimeInterval .
+
+  ?org rdfs:label ?orgLabel .
+  ?degree rdfs:label ?degreeLabel .
+
+  OPTIONAL {
+    ?dateTimeInterval vivo:end ?dateTimeEnd .
+    ?dateTimeEnd vivo:dateTime ?dateEnd .
+  }
+}
+ORDER BY ASC(?dateTimeEnd)');

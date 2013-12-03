@@ -206,6 +206,21 @@ function uom_fae_api_person_contact($uri, $args = array()) {
 }
 
 /**
+ * Return qualification information for a block on a person's profile.
+ */
+function uom_fae_api_person_qualifications($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_QUALIFICATIONS, $args);
+
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
+}
+
+/**
  * Return research grants for a given organisation.
  */
 function uom_fae_api_organisation_research($uri, $args = array()) {
@@ -267,8 +282,18 @@ function uom_fae_api_query($query, $args = array()) {
   else {
     $result = sparql_request($query, $endpoint);
     if ($result['result'] === FALSE) {
+      // If an error occurs, log it.
       drupal_set_message(t('FaE SparQL query error'), 'error');
       watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
+
+      // If we have cached results, use them instead.
+      if ($cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api')) {
+        $result = $cache->data;
+      }
+    }
+    elseif (empty($result['result']) && $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api')) {
+      // Use cached results if we have them.
+      $result = $cache->data;
     }
     elseif ($period) {
       // Caching is enabled, throw the result into the cache!
