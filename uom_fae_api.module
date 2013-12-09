@@ -276,7 +276,14 @@ function uom_fae_api_query($query, $args = array()) {
   // Now that we have a full query, check if there is a cached result for it
   // and load that. Then continue, so that the alter hooks are called.
   $hash = md5($query);
-  if ($period && $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api')) {
+
+  $cache = new stdClass();
+  if ($period) {
+    $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api');
+  }
+
+  // Check for cached results.
+  if ($period && !empty($cache->data)) {
     $result = $cache->data;
   }
   else {
@@ -287,11 +294,11 @@ function uom_fae_api_query($query, $args = array()) {
       watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
 
       // If we have cached results, use them instead.
-      if ($cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api')) {
+      if (!empty($cache->data)) {
         $result = $cache->data;
       }
     }
-    elseif (empty($result['result']) && $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api')) {
+    elseif (empty($result['result']) && !empty($cache->data)) {
       // Use cached results if we have them.
       $result = $cache->data;
     }
