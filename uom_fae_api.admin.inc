@@ -41,7 +41,7 @@ function uom_fae_api_admin_form() {
     '#default_value' => variable_get('uom_fae_api_qid', 'uom-fae-api'),
   );
 
-  $period = drupal_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval');
+  $period = drupal_map_assoc(array(0, 60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400, 172800, 604800), 'format_interval');
   $period[0] = '<' . t('none') . '>';
   $form['uom_fae_api_cache'] = array(
     '#type' => 'select',
