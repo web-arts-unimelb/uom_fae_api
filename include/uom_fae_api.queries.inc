@@ -109,7 +109,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
-  ?publication ?article ?title ?type ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume
+  ?publication ?article ?title ?type ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?book ?isbn13 ?volume
 WHERE {
   <:uri> vivo:authorInAuthorship ?authorship .
   ?authorship vivo:linkedInformationResource ?article .
@@ -135,6 +135,9 @@ WHERE {
   OPTIONAL {
     ?article bibo:edition ?edition
   }
+	OPTIONAL {
+		?article fae:parentTitle ?book
+	}
   OPTIONAL {
     ?article bibo:isbn13 ?isbn13
   }
