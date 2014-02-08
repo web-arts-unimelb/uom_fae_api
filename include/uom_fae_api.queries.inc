@@ -109,9 +109,10 @@ WHERE {
 
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
-  ?publication ?article ?title ?type ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?book ?isbn13 ?volume
+  ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?book ?isbn13 ?volume
 WHERE {
   <:uri> vivo:authorInAuthorship ?authorship .
+	<:uri> rdfs:label ?targetPersonName .
   ?authorship vivo:linkedInformationResource ?article .
   ?article rdfs:label ?title .
   ?article rdf:type ?type .
@@ -146,6 +147,17 @@ WHERE {
   }
   FILTER regex(?type, "findanexpert")
 }');
+
+define('UOM_FAE_PUBLICATION_AUTHOR_NAMES', '
+SELECT
+	?personLabel
+WHERE {
+	<:uri> vivo:informationResourceInAuthorship ?pubPosi.
+  ?pubPosi vivo:linkedAuthor ?personLink.
+  ?personLink rdfs:label ?personLabel.
+}		
+');
+
 
 define('UOM_FAE_PERSON_RESEARCH', '
 SELECT

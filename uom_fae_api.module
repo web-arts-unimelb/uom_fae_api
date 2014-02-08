@@ -288,6 +288,7 @@ function uom_fae_api_query($query, $args = array()) {
   }
   else {
     $result = sparql_request($query, $endpoint);
+
     if ($result['result'] === FALSE) {
       // If an error occurs, log it.
       drupal_set_message(t('FaE SparQL query error'), 'error');
