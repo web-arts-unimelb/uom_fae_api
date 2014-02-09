@@ -358,7 +358,7 @@ function template_preprocess_uom_fae_blocks_publications(&$vars) {
       $publications[$id] = array(
         'title'     => $publication['title'],
         'link'      => $publication['article'],
-        'type'      =>  _uom_fae_blocks_publication_type($publication['type']),
+        'type'      => _uom_fae_blocks_publication_type($publication['type']),
         'people'    => array($publication['authorRank'] => array($publication['person'] => $publication['authorName'])),
         'date'      => (!empty($date)) ? date('Y', $date) : '',
         'publisher' => $publication['publishOrg'],
