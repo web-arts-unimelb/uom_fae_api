@@ -109,7 +109,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
-  ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?book ?isbn13 ?volume
+  ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?edition ?book ?isbn13 ?volume
 WHERE {
   <:uri> vivo:authorInAuthorship ?authorship .
 	<:uri> rdfs:label ?targetPersonName .
@@ -126,12 +126,6 @@ WHERE {
   }
   OPTIONAL {
     ?article bibo:doi ?doi
-  }
-  OPTIONAL {
-    ?article bibo:pageStart ?pageStart
-  }
-  OPTIONAL {
-    ?article bibo:pageEnd ?pageEnd
   }
   OPTIONAL {
     ?article bibo:edition ?edition
@@ -157,6 +151,21 @@ WHERE {
   ?personLink rdfs:label ?personLabel.
 }		
 ');
+
+define('UOM_FAE_PUBLICATION_PAGE_START_END', '
+SELECT
+	?pageStart ?pageEnd
+WHERE {
+	OPTIONAL {
+		<:uri> bibo:pageStart ?pageStart .
+	}
+	OPTIONAL {
+  	<:uri> bibo:pageEnd ?pageEnd .
+	}
+	FILTER(?pageEnd >= ?pageStart)
+}	
+');
+
 
 
 define('UOM_FAE_PERSON_RESEARCH', '
