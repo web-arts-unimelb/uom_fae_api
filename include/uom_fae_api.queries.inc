@@ -152,6 +152,14 @@ WHERE {
 }		
 ');
 
+define('UOM_FAE_PUBLICATION_EDITOR_NAME', '
+SELECT
+	?editorName
+WHERE {
+	<:uri> rdfs:label ?editorName .
+}  
+');
+
 define('UOM_FAE_PUBLICATION_PAGE_START_END', '
 SELECT
 	?pageStart ?pageEnd
