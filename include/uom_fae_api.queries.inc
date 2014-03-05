@@ -109,7 +109,7 @@ WHERE {
 
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
-  ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?edition ?parent ?isbn13 ?volume ?issueNum
+  ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?edition ?parent ?isbn13 ?volume ?issueNum ?myIssueNum
 WHERE {
   <:uri> vivo:authorInAuthorship ?authorship .
 	<:uri> rdfs:label ?targetPersonName .
@@ -141,6 +141,9 @@ WHERE {
   }
 	OPTIONAL {
     ?article bibo:number ?issueNum
+  }
+	OPTIONAL {
+    ?article bibo:issue ?myIssueNum
   }
   FILTER regex(?type, "findanexpert")
 }');
