@@ -181,7 +181,6 @@ WHERE {
 ');
 
 
-
 define('UOM_FAE_PERSON_RESEARCH', '
 SELECT
   ?grant ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateStart ?dateEnd
@@ -206,6 +205,26 @@ WHERE {
     ?org rdfs:label ?orgLabel .
   }
 }');
+
+
+define('UOM_FAE_PERSON_EXTRA_GRANT', '
+SELECT
+	?extraGrantText1 ?extraGrantText2 ?extraGrantText3 ?extraGrantText4
+WHERE {
+	OPTIONAL {
+		<:uri> fae:extraGrantText1 ?extraGrantText1
+	}
+	OPTIONAL {
+		<:uri> fae:extraGrantText2 ?extraGrantText2
+	}
+	OPTIONAL {
+		<:uri> fae:extraGrantText3 ?extraGrantText3
+	}
+	OPTIONAL {
+		<:uri> fae:extraGrantText4 ?extraGrantText4
+	}
+}');
+
 
 define('UOM_FAE_PERSON_AWARDS', '
 SELECT
