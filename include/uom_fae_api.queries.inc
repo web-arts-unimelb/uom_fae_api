@@ -150,13 +150,24 @@ WHERE {
 
 define('UOM_FAE_PUBLICATION_AUTHOR_NAMES', '
 SELECT
-	?personLabel
+	?pubPosi ?personLabel
 WHERE {
 	<:uri> vivo:informationResourceInAuthorship ?pubPosi.
-  ?pubPosi vivo:linkedAuthor ?personLink.
-  ?personLink rdfs:label ?personLabel.
+	OPTIONAL {
+		?pubPosi vivo:linkedAuthor ?personLink.
+		?personLink rdfs:label ?personLabel.
+	}
 }		
 ');
+
+define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL', '
+SELECT
+  ?personLabel
+WHERE {
+  <:uri> rdfs:label ?personLabel.
+}   
+');
+
 
 define('UOM_FAE_PUBLICATION_EDITOR_NAME', '
 SELECT
