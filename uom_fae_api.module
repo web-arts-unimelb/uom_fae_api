@@ -163,6 +163,7 @@ function uom_fae_api_person_awards($uri, $args = array()) {
 /**
  * Return a person's linkages.
  */
+/*
 function uom_fae_api_person_linkages($uri, $args = array()) {
   // Mash in default arguments.
   $defaults = array(
@@ -174,6 +175,39 @@ function uom_fae_api_person_linkages($uri, $args = array()) {
 
   return (!empty($result['rows'])) ? $result['rows'] : NULL;
 }
+*/
+
+/**
+ * Return a person's linkages, but without org label, only org uri
+ */
+function uom_fae_api_person_linkages_no_org_label($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_LINKAGES_NO_ORG_LABEL, $args);
+
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
+}
+
+/**
+ * Return org label 
+ */
+function uom_fae_api_person_linkages_org_label($uri, $args = array()) {
+  // Mash in default arguments.
+  $defaults = array(
+    ':uri' => $uri,
+  );
+  $args += $defaults;
+
+  $result = uom_fae_api_query(UOM_FAE_PERSON_LINKAGES_ORG_LABEL, $args);
+
+  return (!empty($result['rows'])) ? $result['rows'] : NULL;
+}
+
+
 
 /**
  * Return a person's supervision.

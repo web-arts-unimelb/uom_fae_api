@@ -251,6 +251,7 @@ WHERE {
   }
 }');
 
+/*
 define('UOM_FAE_PERSON_LINKAGES', '
 SELECT
   ?org ?orgLabel ?roleLabel ?dateValue
@@ -264,6 +265,28 @@ WHERE {
     ?dateTimeValue vivo:dateTime ?dateValue .
   }
 }');
+*/
+
+define('UOM_FAE_PERSON_LINKAGES_NO_ORG_LABEL', '
+SELECT
+	?org ?roleLabel ?dateValue	
+WHERE {
+	<:uri> fae:internationalLinkageRole ?role .
+	?role rdfs:label ?roleLabel .
+	?role vivo:roleIn ?org .
+	OPTIONAL {
+    ?role vivo:dateTimeValue ?dateTimeValue .
+    ?dateTimeValue vivo:dateTime ?dateValue .
+  }
+}');
+
+define('UOM_FAE_PERSON_LINKAGES_ORG_LABEL', '
+SELECT
+  ?orgLabel  
+WHERE {
+  <:uri> rdfs:label ?orgLabel . 
+}');
+
 
 /*
  * Fetch supervision information for a specific person.
