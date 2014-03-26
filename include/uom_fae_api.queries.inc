@@ -157,7 +157,8 @@ WHERE {
 		?pubPosi vivo:linkedAuthor ?personLink.
 		?personLink rdfs:label ?personLabel.
 	}
-}		
+}
+ORDER BY ?pubPosi		
 ');
 
 define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL', '
