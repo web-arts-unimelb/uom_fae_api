@@ -150,7 +150,7 @@ WHERE {
 
 define('UOM_FAE_PUBLICATION_AUTHOR_NAMES', '
 SELECT
-	?pubPosi ?personLabel
+	?pubPosi ?personLink ?personLabel
 WHERE {
 	<:uri> vivo:informationResourceInAuthorship ?pubPosi.
 	OPTIONAL {
