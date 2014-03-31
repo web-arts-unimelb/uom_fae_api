@@ -75,7 +75,7 @@ ORDER BY DESC(?dateTimeEnd) ASC(?dateTimeStart)');
  */
 define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
 SELECT
-  ?authorName ?authorRank ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?type
+  ?authorName ?authorRank ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?type ?myIssueNum
 WHERE {
   ?person vivo:personInPosition ?position .
   ?position vivo:positionInOrganization <:uri> .
@@ -119,6 +119,9 @@ WHERE {
   }
   OPTIONAL {
     ?article bibo:volume ?volume
+  }
+  OPTIONAL {
+    ?article bibo:issue ?myIssueNum
   }
 
   FILTER (?dateValue >= ":prevYear-01-01T00:00:00Z"^^xsd:dateTime)

@@ -262,17 +262,35 @@ function uom_fae_blocks_publications($uri) {
     }
   }
 
-  $data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
+  $tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
     ':uri' => $uri,
     ':currYear' => sprintf("%04d", $currYear + 1),
     ':prevYear' => sprintf("%04d", ($currYear)),
   ));
-
-  if (empty($data['rows'])) {
+  
+  if (empty($tmp_data['rows'])) {
     return NULL;
   }
 
-  return theme('uom_fae_blocks_publications', array('data' => $data['rows'], 'uri' => $uri));
+	foreach($tmp_data['rows'] as &$row) {
+		$article_uri = $row['article'];
+		$pub_type_uri = $row['type'];
+		
+		$author_text = _faeprofile_author_text($article_uri);
+		$editor_text = _faeprofile_editor_text($article_uri);
+		$page_start_end_text = _faeprofile_page_start_end($article_uri);
+		$type_array = _faeprofile_publication_type($pub_type_uri);
+		
+		$row['author_text'] = $author_text;
+    $row['editor_text'] = $editor_text;
+		$row['page_start_end_text'] = $page_start_end_text;
+		$row['type_code'] = $type_array['type_code'];
+		$row['type_text'] = $type_array['type_text'];
+	}
+
+	//dsm($tmp_data['rows']);
+
+  return theme('uom_fae_blocks_publications', array('data' => $tmp_data['rows'], 'uri' => $uri));
 }
 
 /**
@@ -345,6 +363,9 @@ function template_preprocess_uom_fae_blocks_publications(&$vars) {
   // Init with empty variables.
   $publications = $vars['publications'] = $vars['categories'] = array();
 
+	//test
+	//dsm($vars['data']);
+
   foreach ($vars['data'] as $publication) {
     $id = $publication['article'];
 
@@ -356,27 +377,40 @@ function template_preprocess_uom_fae_blocks_publications(&$vars) {
     }
     else {
       $publications[$id] = array(
+				'publication' => $publication['publication'],
         'title'     => $publication['title'],
         'link'      => $publication['article'],
         'type'      => _uom_fae_blocks_publication_type($publication['type']),
-        'people'    => array($publication['authorRank'] => array($publication['person'] => $publication['authorName'])),
-        'date'      => (!empty($date)) ? date('Y', $date) : '',
-        'publisher' => $publication['publishOrg'],
-        'start'     => (!empty($publication['pageStart'])) ? $publication['pageStart'] : '',
-        'end'       => (!empty($publication['pageEnd'])) ? $publication['pageEnd'] : '',
-        'edition'   => (!empty($publication['edition'])) ? $publication['edition'] : '',
-        'isbn13'    => (!empty($publication['isbn13'])) ? $publication['isbn13'] : '',
-        'volume'    => (!empty($publication['volume'])) ? $publication['volume'] : '',
+				'type_code' => $publication['type_code'],
+      	'type_text' => $publication['type_text'],
+				'publisher' => $publication['publishOrg'],
+				'page_start_end' => $publication['page_start_end_text'],
+        //'people'    => array($publication['authorRank'] => array($publication['person'] => $publication['authorName'])),
+				'edition' => $publication['edition'],
+				'parent' => $publication['parentTitle'],
+				'volume'    => $publication['volume'],
+      	'my_issue_num' => $publication['myIssueNum'],
+				'isbn13' => $publication['isbn13'],
+      	'date' => date('Y', $date),
+      	'year' => date('Y', $date),
+      	'author_text' => $publication['author_text'],
+      	'editor_text' => $publication['editor_text'],
       );
     }
   }
 
   // Theme each of the publication-with-people records.
-  foreach ($publications as $id => &$publication) {
-    uksort($publication['people'], "_uom_fae_blocks_peoplesort");
-    $vars['publications'][] = theme('uom_fae_blocks_publication', array('publication' => $publication));
-    $vars['categories'][$publication['type']][] = theme('uom_fae_blocks_publication', array('publication' => $publication));
+  foreach ($publications as $id => $publication) {
+    //uksort($publication['people'], "_uom_fae_blocks_peoplesort");
+    //$vars['publications'][] = theme('uom_fae_blocks_publication', array('publication' => $publication));
+    //$vars['categories'][$publication['type']][] = theme('uom_fae_blocks_publication', array('publication' => $publication));
+		$vars['categories'][$publication['type']][$publication['link']] = _faeprofile_publication_select_theme($publication);
   }
+
+	// Sort
+	foreach($vars['categories'] as &$cat) {
+		ksort($cat);
+	}
 }
 
 /**
@@ -460,6 +494,7 @@ function theme_uom_fae_blocks_publications($variables) {
  *
  * Yue A. 2010. Ann Hui's Song of the Exile. Hong Kong: Hong Kong University Press.·
  */
+/*
 function theme_uom_fae_blocks_publication($variables) {
   $output = '';
   $publication = $variables['publication'];
@@ -488,6 +523,7 @@ function theme_uom_fae_blocks_publication($variables) {
   }
   return $output;
 }
+*/
 
 function theme_uom_fae_blocks_person($variables) {
   $name = $variables['name'];
