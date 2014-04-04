@@ -148,6 +148,7 @@ WHERE {
   FILTER regex(?type, "findanexpert")
 }');
 
+// http://stackoverflow.com/questions/5161568/how-to-properly-use-sparql-optional-to-retrieve-attributes-for-a-resource-that-m
 define('UOM_FAE_PUBLICATION_AUTHOR_NAMES', '
 SELECT
 	?pubPosi ?personLink ?personLabel
@@ -155,6 +156,8 @@ WHERE {
 	<:uri> vivo:informationResourceInAuthorship ?pubPosi.
 	OPTIONAL {
 		?pubPosi vivo:linkedAuthor ?personLink.
+	}
+	OPTIONAL {
 		?personLink rdfs:label ?personLabel.
 	}
 }
