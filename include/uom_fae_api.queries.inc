@@ -149,26 +149,33 @@ WHERE {
 }');
 
 // http://stackoverflow.com/questions/5161568/how-to-properly-use-sparql-optional-to-retrieve-attributes-for-a-resource-that-m
-define('UOM_FAE_PUBLICATION_AUTHOR_NAMES', '
+define('UOM_FAE_PUBLICATION_AUTHOR_LINKS', '
 SELECT
-	?pubPosi ?personLink ?personLabel
+  ?pubPosi ?personLink
 WHERE {
-	<:uri> vivo:informationResourceInAuthorship ?pubPosi.
-	OPTIONAL {
-		?pubPosi vivo:linkedAuthor ?personLink.
-	}
-	OPTIONAL {
-		?personLink rdfs:label ?personLabel.
-	}
+  <:uri> vivo:informationResourceInAuthorship ?pubPosi.
+  OPTIONAL {
+    ?pubPosi vivo:linkedAuthor ?personLink.
+  }
 }
-ORDER BY ?pubPosi		
+ORDER BY ?pubPosi   
 ');
+
 
 define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL', '
 SELECT
   ?personLabel
 WHERE {
   <:uri> rdfs:label ?personLabel.
+}   
+');
+
+
+define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL_1', '
+SELECT
+  ?personLabel
+WHERE {
+  <:uri> vivo:authorNameAsListed ?personLabel.
 }   
 ');
 
