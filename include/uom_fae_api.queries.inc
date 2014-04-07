@@ -149,18 +149,24 @@ WHERE {
 }');
 
 // http://stackoverflow.com/questions/5161568/how-to-properly-use-sparql-optional-to-retrieve-attributes-for-a-resource-that-m
-define('UOM_FAE_PUBLICATION_AUTHOR_LINKS', '
+// http://www.cambridgesemantics.com/semantic-university/sparql-nuts-and-bolts
+
+define('UOM_FAE_PUBLICATION_AUTHOR_PUB_POSIS', '
 SELECT
-  ?pubPosi ?personLink
+  ?pubPosi
 WHERE {
   <:uri> vivo:informationResourceInAuthorship ?pubPosi.
-  OPTIONAL {
-    ?pubPosi vivo:linkedAuthor ?personLink.
-  }
 }
-ORDER BY ?pubPosi   
+ORDER BY ?pubPosi 
 ');
 
+define('UOM_FAE_PUBLICATION_AUTHOR_PERSON_LINK', '
+SELECT
+  ?personLink
+WHERE {
+  <:uri> vivo:linkedAuthor ?personLink.
+}
+');
 
 define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL', '
 SELECT
