@@ -128,5 +128,4 @@ WHERE {
   FILTER (?dateValue  < ":currYear-01-01T00:00:00Z"^^xsd:dateTime)
   FILTER regex(?type, "findanexpert")
 }
-
-ORDER BY ASC(?title) ASC(?authorRank)');
+ORDER BY ASC(?title)');

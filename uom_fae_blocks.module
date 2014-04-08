@@ -250,47 +250,58 @@ function uom_fae_blocks_research_past($uri) {
  * Callback that returns a themed list of publications for a given year.
  */
 function uom_fae_blocks_publications($uri) {
-  $args = func_get_args();
-
-  $currYear = intval(date('Y'));
-
-  // Grab a year argument from the callback string and sanitise it.
-  if (!empty($args[1])) {
-    $year = intval($args[1]);
-    if (!empty($year) && $year > 0 && $year <= $currYear) {
-      $currYear = $year;
-    }
+	$data = '';
+	$cache_id = 'uom_fae_blocks:'. md5('uom_fae_blocks_publications');
+	
+  if($cached = cache_get($cache_id, 'cache'))  {
+    $data = $cached->data;
   }
-
-  $tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
-    ':uri' => $uri,
-    ':currYear' => sprintf("%04d", $currYear + 1),
-    ':prevYear' => sprintf("%04d", ($currYear)),
-  ));
   
-  if (empty($tmp_data['rows'])) {
-    return NULL;
+	if(empty($data)) {
+    $args = func_get_args();
+
+		$currYear = intval(date('Y'));
+
+		// Grab a year argument from the callback string and sanitise it.
+		if (!empty($args[1])) {
+		  $year = intval($args[1]);
+		  if (!empty($year) && $year > 0 && $year <= $currYear) {
+		    $currYear = $year;
+		  }
+		}
+
+		$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
+		  ':uri' => $uri,
+		  ':currYear' => sprintf("%04d", $currYear + 1),
+		  ':prevYear' => sprintf("%04d", ($currYear)),
+		));
+		
+		if (empty($tmp_data['rows'])) {
+		  return NULL;
+		}
+
+		foreach($tmp_data['rows'] as &$row) {
+			$article_uri = $row['article'];
+			$pub_type_uri = $row['type'];
+		
+			$author_text = _faeprofile_author_text($article_uri);
+			$editor_text = _faeprofile_editor_text($article_uri);
+			$page_start_end_text = _faeprofile_page_start_end($article_uri);
+			$type_array = _faeprofile_publication_type($pub_type_uri);
+		
+			$row['author_text'] = $author_text;
+		  $row['editor_text'] = $editor_text;
+			$row['page_start_end_text'] = $page_start_end_text;
+			$row['type_code'] = $type_array['type_code'];
+			$row['type_text'] = $type_array['type_text'];
+		}
+    
+    $data = $tmp_data['rows'];
+    // Cache for 1 days
+    cache_set($cache_id, $data, 'cache', time() + 24*60*60);
   }
 
-	foreach($tmp_data['rows'] as &$row) {
-		$article_uri = $row['article'];
-		$pub_type_uri = $row['type'];
-		
-		$author_text = _faeprofile_author_text($article_uri);
-		$editor_text = _faeprofile_editor_text($article_uri);
-		$page_start_end_text = _faeprofile_page_start_end($article_uri);
-		$type_array = _faeprofile_publication_type($pub_type_uri);
-		
-		$row['author_text'] = $author_text;
-    $row['editor_text'] = $editor_text;
-		$row['page_start_end_text'] = $page_start_end_text;
-		$row['type_code'] = $type_array['type_code'];
-		$row['type_text'] = $type_array['type_text'];
-	}
-
-	//dsm($tmp_data['rows']);
-
-  return theme('uom_fae_blocks_publications', array('data' => $tmp_data['rows'], 'uri' => $uri));
+  return theme('uom_fae_blocks_publications', array('data' => $data, 'uri' => $uri));
 }
 
 /**
@@ -564,4 +575,20 @@ function _uom_fae_blocks_publication_type($uri) {
  */
 function _uom_fae_blocks_peoplesort($a, $b) {
   return intval($a) > intval($b);
+}
+
+
+function _uom_fae_blocks_cache($data) {
+	$the_return = '';
+
+	$cache_id = 'uom_fae_blocks:'. md5('uom_fae_blocks_publications');
+	if($cached = cache_get($cache_id, 'cache'))  {
+    $the_return = $cached->data;
+  }
+
+  if(empty($the_return)) {
+    $the_return = $data;
+    cache_set($cache_id, $data, 'cache', time() + 60*60); //1 hour
+  }
+  return $the_return;
 }
