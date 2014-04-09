@@ -264,7 +264,6 @@ function uom_fae_blocks_publications($uri) {
 	}
 
 	$cache_id = 'uom_fae_blocks:'. md5($currYear);
-	
   if($cached = cache_get($cache_id, 'cache'))  {
     $data = $cached->data;
   }
@@ -575,20 +574,4 @@ function _uom_fae_blocks_publication_type($uri) {
  */
 function _uom_fae_blocks_peoplesort($a, $b) {
   return intval($a) > intval($b);
-}
-
-
-function _uom_fae_blocks_cache($data) {
-	$the_return = '';
-
-	$cache_id = 'uom_fae_blocks:'. md5('uom_fae_blocks_publications');
-	if($cached = cache_get($cache_id, 'cache'))  {
-    $the_return = $cached->data;
-  }
-
-  if(empty($the_return)) {
-    $the_return = $data;
-    cache_set($cache_id, $data, 'cache', time() + 60*60); //1 hour
-  }
-  return $the_return;
 }
