@@ -269,7 +269,6 @@ function uom_fae_blocks_publications($uri) {
   }
   
 	if(empty($data)) {
-		//if(uom_fae_api_is_url_reachable('http://404.pi')) { // Simulate Joseki is down
 		if(uom_fae_api_is_url_reachable(UOM_SPARQL_URL)) {
 		
 			$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
@@ -300,7 +299,7 @@ function uom_fae_blocks_publications($uri) {
 		  
 		  // Cache it
 		  $data = $tmp_data['rows'];
-		  cache_set($cache_id, $data, 'cache', time() + 24*60*60);
+		  cache_set($cache_id, $data, 'cache', time() + FAE_MODULE_CACHE_TIME);
 		  
 		  // Update the backup data
 		  _fae_custom_cache_set($cache_id, $data);
