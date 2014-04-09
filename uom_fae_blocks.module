@@ -251,25 +251,25 @@ function uom_fae_blocks_research_past($uri) {
  */
 function uom_fae_blocks_publications($uri) {
 	$data = '';
-	$cache_id = 'uom_fae_blocks:'. md5('uom_fae_blocks_publications');
+	$args = func_get_args();
+	
+	$currYear = intval(date('Y'));
+
+	// Grab a year argument from the callback string and sanitise it.
+	if (!empty($args[1])) {
+	  $year = intval($args[1]);
+	  if (!empty($year) && $year > 0 && $year <= $currYear) {
+	    $currYear = $year;
+	  }
+	}
+
+	$cache_id = 'uom_fae_blocks:'. md5($currYear);
 	
   if($cached = cache_get($cache_id, 'cache'))  {
     $data = $cached->data;
   }
   
 	if(empty($data)) {
-    $args = func_get_args();
-
-		$currYear = intval(date('Y'));
-
-		// Grab a year argument from the callback string and sanitise it.
-		if (!empty($args[1])) {
-		  $year = intval($args[1]);
-		  if (!empty($year) && $year > 0 && $year <= $currYear) {
-		    $currYear = $year;
-		  }
-		}
-
 		$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
 		  ':uri' => $uri,
 		  ':currYear' => sprintf("%04d", $currYear + 1),
