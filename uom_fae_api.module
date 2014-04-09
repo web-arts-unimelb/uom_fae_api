@@ -4,6 +4,7 @@
  */
 
 define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
+define('UOM_SPARQL_URL', 'http://128.250.202.125:7001/joseki');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 
 // Load the predefined SparQL queries.
@@ -452,4 +453,109 @@ function uom_fae_api_publication_types($key = NULL) {
   );
 
   return (empty($key)) ? $types : $types[$key];
+}
+
+
+function uom_fae_api_is_url_reachable($url) {
+	$condi = false;
+	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
+	curl_exec($ch);
+	if(
+		curl_getinfo($ch, CURLINFO_HTTP_CODE) == 200 || 
+		curl_getinfo($ch, CURLINFO_HTTP_CODE) == 301 ||
+		curl_getinfo($ch, CURLINFO_HTTP_CODE) == 302
+	) {
+		$condi = true;
+	}
+	else {
+		$condi = false;
+	}
+	
+	curl_close($ch);
+	return $condi;
+}
+
+
+function _fae_custom_cache_set($cache_id, $data) {
+	// http://stackoverflow.com/questions/8878779/sql-error-1406-data-too-long-for-column
+	// https://drupal.org/node/1676344
+	$table_name = 'fae_custom_cache';
+	
+	if(!db_table_exists($table_name)) {
+		$schema = array(
+	    'description' => 'Table for caching',
+	    'fields' => array(
+	    	'id' 					=> array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
+	    	'cache_id' 		=> array('type' => 'varchar', 'length' => 256, 'not null' => TRUE), 
+	    	'data' 				=> array('type' => 'longtext', 'not null' => TRUE),
+	    	'primary key' => array('id'),
+	    ),
+	  );	
+	
+		db_create_table($table_name, $schema);
+	}
+		
+	// Select
+	$tmp_res = db_select($table_name, 'c')
+		->fields('c')
+    ->condition('cache_id', $cache_id, '=')	
+		->execute();
+ 
+	$json_data = json_encode($data);
+ 
+	if($tmp_res->rowCount() >= 1) {
+		//test
+		//dsm('update');
+	
+		// Update
+		$my_data = array(
+			'data' => $json_data,
+		);
+		
+		db_update($table_name)
+  		->fields($my_data)
+  		->condition('cache_id', $cache_id, '=')
+  		->execute();
+	}
+	else {
+		//test
+		//dsm('insert');
+	
+		// Insert
+		$my_data = array(
+			'cache_id' => $cache_id,
+			'data' => $json_data,
+		);
+		db_insert($table_name)
+			->fields($my_data)
+			->execute();
+	} 
+}
+
+
+function _fae_custom_cache_get($cache_id) {
+	//test
+	dsm('Joseki is down, so get backup data');
+
+	$data = '';
+	$table_name = 'fae_custom_cache';
+	$tmp_res = db_select($table_name, 'c')
+		->fields('c')
+    ->condition('cache_id', $cache_id, '=')	
+		->execute();
+	
+	if($tmp_res->rowCount() >= 1) {
+		$result = $tmp_res->fetchAssoc();
+		$data = json_decode($result['data'], true);
+	}
+	else {
+		// Error
+		dsm("No backup data at table $table_name!");
+		$data = '';
+	}
+	
+	return $data;	
 }
