@@ -4,7 +4,6 @@
  */
 
 define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
-define('UOM_SPARQL_URL', 'http://128.250.202.125:7001/joseki');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 
 define('FAE_MODULE_CACHE_TIME', '86400');
@@ -324,9 +323,19 @@ function uom_fae_api_query($query, $args = array()) {
     $result = $cache->data;
   }
   else {
+  
     $result = sparql_request($query, $endpoint);
 
-    if ($result['result'] === FALSE) {
+		if($result === NULL) {
+			// There are logged errors.
+			if(!uom_fae_api_is_url_reachable()) {
+				// In here, Joseki is definitely down.
+				dsm('Joseki is down. Use backup data for query result.');
+				$cache_id = 'uom_fae_api:query:'. $hash;
+ 				$result = _fae_custom_cache_get($cache_id);
+			}
+		}
+    else if ($result['result'] === FALSE) {
       // If an error occurs, log it.
       drupal_set_message(t('FaE SparQL query error'), 'error');
       watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
@@ -343,6 +352,10 @@ function uom_fae_api_query($query, $args = array()) {
     elseif ($period) {
       // Caching is enabled, throw the result into the cache!
       cache_set('uom_fae_api:' . $hash, $result, 'cache_uom_fae_api', time() + $period);
+      
+      // Backup data
+      $cache_id = 'uom_fae_api:query:'. $hash;
+      _fae_custom_cache_set($cache_id, $result);
     }
   }
 
@@ -458,7 +471,16 @@ function uom_fae_api_publication_types($key = NULL) {
 }
 
 
-function uom_fae_api_is_url_reachable($url) {
+function uom_fae_api_is_url_reachable() {
+	// http://128.250.202.125:7001/joseki/oracle
+	$tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
+	$start = '-'. strlen('/oracle');
+	$url = substr($tmp_url, $start);
+	
+	//test
+	dsm($url);
+
+
 	$condi = false;
 	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 	$ch = curl_init($url);
@@ -539,8 +561,7 @@ function _fae_custom_cache_set($cache_id, $data) {
 
 
 function _fae_custom_cache_get($cache_id) {
-	//test
-	dsm('Joseki is down, so get backup data');
+	dsm('Joseki is down, Use backup data for page.');
 
 	$data = '';
 	$table_name = 'fae_custom_cache';
@@ -555,7 +576,7 @@ function _fae_custom_cache_get($cache_id) {
 	}
 	else {
 		// Error
-		dsm("No backup data at table $table_name!");
+		dsm("Cache_id: $cache_id. No backup data at table $table_name.");
 		$data = '';
 	}
 	

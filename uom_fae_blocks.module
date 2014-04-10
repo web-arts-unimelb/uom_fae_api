@@ -269,7 +269,7 @@ function uom_fae_blocks_publications($uri) {
   }
   
 	if(empty($data)) {
-		if(uom_fae_api_is_url_reachable(UOM_SPARQL_URL)) {
+		if(uom_fae_api_is_url_reachable()) {
 		
 			$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
 				':uri' => $uri,
