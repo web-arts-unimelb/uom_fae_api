@@ -474,13 +474,12 @@ function uom_fae_api_publication_types($key = NULL) {
 function uom_fae_api_is_url_reachable() {
 	// http://128.250.202.125:7001/joseki/oracle
 	$tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
-	$start = '-'. strlen('/oracle');
-	$url = substr($tmp_url, $start);
+	$end_len = strlen('/oracle');
+	$full_len = strlen($tmp_url);
+	$needed_len = $full_len - $end_len; 
 	
-	//test
-	dsm($url);
-
-
+	$url = substr($tmp_url, 0, $needed_len);
+	
 	$condi = false;
 	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 	$ch = curl_init($url);
@@ -509,17 +508,15 @@ function _fae_custom_cache_set($cache_id, $data) {
 	$table_name = 'fae_custom_cache';
 	
 	if(!db_table_exists($table_name)) {
-		$schema = array(
-	    'description' => 'Table for caching',
-	    'fields' => array(
-	    	'id' 					=> array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
-	    	'cache_id' 		=> array('type' => 'varchar', 'length' => 256, 'not null' => TRUE), 
-	    	'data' 				=> array('type' => 'longtext', 'not null' => TRUE),
-	    	'primary key' => array('id'),
-	    ),
-	  );	
-	
-		db_create_table($table_name, $schema);
+		$sql = "
+			CREATE TABLE $table_name(
+				id INT(11) NOT NULL AUTO_INCREMENT,
+				cache_id VARCHAR(256) NOT NULL,
+				data LONGTEXT NOT NULL,
+				PRIMARY KEY ( id )
+			)
+		";
+		db_query($sql);
 	}
 		
 	// Select
@@ -565,19 +562,22 @@ function _fae_custom_cache_get($cache_id) {
 
 	$data = '';
 	$table_name = 'fae_custom_cache';
-	$tmp_res = db_select($table_name, 'c')
-		->fields('c')
-    ->condition('cache_id', $cache_id, '=')	
-		->execute();
 	
-	if($tmp_res->rowCount() >= 1) {
-		$result = $tmp_res->fetchAssoc();
-		$data = json_decode($result['data'], true);
-	}
-	else {
-		// Error
-		dsm("Cache_id: $cache_id. No backup data at table $table_name.");
-		$data = '';
+	if(db_table_exists($table_name)) {
+		$tmp_res = db_select($table_name, 'c')
+			->fields('c')
+		  ->condition('cache_id', $cache_id, '=')	
+			->execute();
+	
+		if($tmp_res->rowCount() >= 1) {
+			$result = $tmp_res->fetchAssoc();
+			$data = json_decode($result['data'], true);
+		}
+		else {
+			// Error
+			dsm("Cache_id: $cache_id. No backup data at table $table_name.");
+			$data = '';
+		}
 	}
 	
 	return $data;	
