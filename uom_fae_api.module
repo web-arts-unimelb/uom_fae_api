@@ -323,47 +323,55 @@ function uom_fae_api_query($query, $args = array()) {
     $result = $cache->data;
   }
   else {
-  
-    $result = sparql_request($query, $endpoint);
+  	if(uom_fae_api_is_url_reachable()) {
+		  $result = sparql_request($query, $endpoint);
 
-		if($result === NULL) {
-			// There are logged errors.
-			if(!uom_fae_api_is_url_reachable()) {
-				// In here, Joseki is definitely down.
-				dsm('Joseki is down. Use backup data for query result.');
-				$cache_id = 'uom_fae_api:query:'. $hash;
- 				$result = _fae_custom_cache_get($cache_id);
+			if($result === NULL) {
+				// There are logged errors.
+				// I am not sure how to deal with this yet.
+				dsm('There are logged errors.');
 			}
-		}
-    else if ($result['result'] === FALSE) {
-      // If an error occurs, log it.
-      drupal_set_message(t('FaE SparQL query error'), 'error');
-      watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
+		  else if ($result['result'] === FALSE) {
+		    // If an error occurs, log it.
+		    drupal_set_message(t('FaE SparQL query error'), 'error');
+		    watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
 
-      // If we have cached results, use them instead.
-      if (!empty($cache->data)) {
-        $result = $cache->data;
-      }
-    }
-    elseif (empty($result['result']) && !empty($cache->data)) {
-      // Use cached results if we have them.
-      $result = $cache->data;
-    }
-    elseif ($period) {
-      // Caching is enabled, throw the result into the cache!
-      cache_set('uom_fae_api:' . $hash, $result, 'cache_uom_fae_api', time() + $period);
-      
-      // Backup data
-      $cache_id = 'uom_fae_api:query:'. $hash;
-      _fae_custom_cache_set($cache_id, $result);
-    }
+		    // If we have cached results, use them instead.
+		    if (!empty($cache->data)) {
+		      $result = $cache->data;
+		    }
+		  }
+		  elseif (empty($result['result']) && !empty($cache->data)) {
+		    // Use cached results if we have them.
+		    $result = $cache->data;
+		  }
+		  elseif ($period) {
+		    // Caching is enabled, throw the result into the cache!
+		    cache_set('uom_fae_api:' . $hash, $result, 'cache_uom_fae_api', time() + $period);
+		    
+		    // Backup data
+		    $cache_id = 'uom_fae_api:query:'. $hash;
+		    _fae_custom_cache_set($cache_id, $result);
+		  }
+		}
+		else {
+			// In here, Joseki is definitely down.
+			dsm('Joseki is down. Use backup data for query result.');
+			$cache_id = 'uom_fae_api:query:'. $hash;
+			$result = _fae_custom_cache_get($cache_id);
+		}  
   }
 
-  // Allow the result to be rewritten.
-  drupal_alter('uom_fae_api_query_result', $result);
+	if(!empty($result)) {
+  	// Allow the result to be rewritten.
+  	drupal_alter('uom_fae_api_query_result', $result);
 
-  // Return the result.
-  return $result['result'];
+  	// Return the result.
+  	return $result['result'];
+  }
+  else {
+  	return '';
+  }
 }
 
 /**
