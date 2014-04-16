@@ -302,11 +302,11 @@ function uom_fae_blocks_publications($uri) {
 		  cache_set($cache_id, $data, 'cache', time() + FAE_MODULE_CACHE_TIME);
 		  
 		  // Update the backup data
-		  _fae_custom_cache_set($cache_id, $data);
+		  uom_fae_api_custom_cache_set($cache_id, $data);
 		}
 		else {
 			// Joseki is down, so get the backup data
-			$data = _fae_custom_cache_get($cache_id);
+			$data = uom_fae_api_custom_cache_get($cache_id);
 		}
   }
 
