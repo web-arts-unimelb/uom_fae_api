@@ -5,7 +5,6 @@
 
 define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
-
 define('FAE_MODULE_CACHE_TIME', '86400');
 
 // Load the predefined SparQL queries.
