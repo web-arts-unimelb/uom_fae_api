@@ -90,7 +90,6 @@ WHERE {
   ?authorship vivo:linkedInformationResource ?article .
   ?article rdfs:label ?title .
   ?article rdf:type ?type .
-  ?article fae:parentTitle ?parentTitle .
 
   ?article vivo:dateTimeValue ?dateTimeValue .
   ?dateTimeValue vivo:dateTime ?dateValue .
@@ -98,6 +97,9 @@ WHERE {
   ?article vivo:publisher ?publisher .
   ?publisher rdfs:label ?publishOrg .
 
+	OPTIONAL {
+		?article fae:parentTitle ?parentTitle .
+	}
   OPTIONAL {
     ?article vivo:hasPublicationVenue ?pubVenue .
     ?pubVenue rdfs:label ?publication .

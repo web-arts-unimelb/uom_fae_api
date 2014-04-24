@@ -393,7 +393,7 @@ function template_preprocess_uom_fae_blocks_publications(&$vars) {
 
     // Already processed, add an extra person only.
     if (!empty($publications[$id])) {
-      $publications[$id]['people'][$publication['authorRank']] = array($publication['person'] => $publication['authorName']);
+      //$publications[$id]['people'][$publication['authorRank']] = array($publication['person'] => $publication['authorName']);
     }
     else {
       $publications[$id] = array(
