@@ -326,12 +326,17 @@ function uom_fae_api_query($query, $args = array()) {
 			$cache_id = 'uom_fae_api:empty:'. $hash;
 			$is_empty_query_result = cache_get($cache_id, 'cache_uom_fae_api')->data;
 
-			if($is_empty_query_result) {
+			if($is_empty_query_result == 1) {
 				// It was empty before, so don't query, but set it empty.
 				$result = '';
 			}
 			else {
+				// Someone may have $result array, but the $rows within are all empty.
+				// That means no tab will be displaying
 				$result = sparql_request($query, $endpoint);
+
+				//test
+				//dsm($query);
 			}
 
 			if($result === NULL) {
@@ -344,7 +349,7 @@ function uom_fae_api_query($query, $args = array()) {
 
 				// So this query returns empty result, we remember it as empty result, so next time we just load empty result. 
 				$cache_id = 'uom_fae_api:empty:'. $hash;
-				cache_set($cache_id, 1, 'cache_uom_fae_api', time() + $period);	
+				cache_set($cache_id, 1, 'cache_uom_fae_api', time() + FAE_MODULE_CACHE_TIME);	
 			}
 		  else if ($result['result'] === FALSE) {
 		    // If an error occurs, log it.

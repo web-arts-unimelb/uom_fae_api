@@ -51,12 +51,12 @@ WHERE {
 /*
  * Fetch contact information for a specific person, so it can be
  * displayed in a block.
+ * Note: it doesn't have <:uri> rdf:type vivo:FacultyMember.
  */
 define('UOM_FAE_PERSON_CONTACT', '
 SELECT
   ?email ?phone ?room ?building ?supervisor ?thumbnail ?image
 WHERE {
-  <:uri> rdf:type vivo:FacultyMember.
   OPTIONAL { <:uri> vivo:email ?email. }
   OPTIONAL { <:uri> fae:webpage ?webpage. }
   OPTIONAL { <:uri> vivo:phoneNumber ?phone. }
@@ -74,11 +74,12 @@ WHERE {
   }
 } LIMIT 1');
 
+// Note: remove <http://www.findanexpert.unimelb.edu.au/individual/person625285> rdf:type vivo:FacultyMember
+// It doesn't have vivo:FacultyMember
 define('UOM_FAE_PERSON_OVERVIEW', '
 SELECT
   ?overviewText1 ?overviewText2 ?overviewText3 ?overviewText4
 WHERE {
-  <:uri> rdf:type vivo:FacultyMember.
   OPTIONAL {
     <:uri>  fae:overviewText1 ?overviewText1
   }
@@ -307,12 +308,12 @@ WHERE {
 
 /*
  * Fetch supervision information for a specific person.
+ * Note: it doesn't have <:uri> rdf:type vivo:FacultyMember.
  */
 define('UOM_FAE_PERSON_SUPERVISION', '
 SELECT
   ?supervisor ?supervisorText1
 WHERE {
-  <:uri> rdf:type vivo:FacultyMember.
   OPTIONAL { <:uri> fae:availableForSupervision ?supervisor. }
   OPTIONAL { <:uri> fae:supervisorText1 ?supervisorText1. }
 }');
