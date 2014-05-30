@@ -55,7 +55,7 @@ WHERE {
  */
 define('UOM_FAE_PERSON_CONTACT', '
 SELECT
-  ?email ?phone ?room ?building ?supervisor ?thumbnail ?image
+  ?email ?phone ?room ?building ?supervisor ?thumbnail ?image ?actualFilePart
 WHERE {
   OPTIONAL { <:uri> vivo:email ?email. }
   OPTIONAL { <:uri> fae:webpage ?webpage. }
@@ -64,6 +64,7 @@ WHERE {
   OPTIONAL {
     <:uri> vitro-public:mainImage ?file.
     ?file vitro-public:thumbnailImage ?thumbnail.
+		?thumbnail vitro-public:directDownloadUrl ?actualFilePart.
     ?file vitro-public:downloadLocation ?image.
   }
   OPTIONAL {
