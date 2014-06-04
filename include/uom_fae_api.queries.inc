@@ -356,12 +356,12 @@ WHERE {
 
   ?training vivo:trainingAtOrganization ?org .
   ?training vivo:degreeEarned ?degree .
-  ?training vivo:dateTimeInterval ?dateTimeInterval .
 
   ?org rdfs:label ?orgLabel .
   ?degree rdfs:label ?degreeLabel .
 
   OPTIONAL {
+		?training vivo:dateTimeInterval ?dateTimeInterval .
     ?dateTimeInterval vivo:end ?dateTimeEnd .
     ?dateTimeEnd vivo:dateTime ?dateEnd .
   }
