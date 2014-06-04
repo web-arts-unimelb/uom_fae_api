@@ -317,6 +317,9 @@ function uom_fae_api_query($query, $args = array()) {
     $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api');
   }
 
+	// Initialize
+	$result = NULL;
+
   // Check for cached results.
   if ($period && !empty($cache->data)) {
     $result = $cache->data;
@@ -385,6 +388,10 @@ function uom_fae_api_query($query, $args = array()) {
 	if(!empty($result)) {
   	// Allow the result to be rewritten.
   	drupal_alter('uom_fae_api_query_result', $result);
+
+		// Set it to non-empty
+		$cache_id = 'uom_fae_api:empty:'. $hash;
+		cache_set($cache_id, 0, 'cache_uom_fae_api', time() + FAE_MODULE_CACHE_TIME);
 
   	// Return the result.
   	return $result['result'];
