@@ -295,8 +295,6 @@ function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
  * Will query the raw response on success if caching is enabled.
  */
 function uom_fae_api_query($query, $args = array()) {
-  $period = variable_get('uom_fae_api_cache', 0);
-
   $endpoint = new stdClass();
   $endpoint->uri = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
 
@@ -307,98 +305,73 @@ function uom_fae_api_query($query, $args = array()) {
 
   // Replace vars.
   $query = trim(strtr($query, $args));
-
-  // Now that we have a full query, check if there is a cached result for it
-  // and load that. Then continue, so that the alter hooks are called.
-  $hash = md5($query);
-
-  $cache = new stdClass();
-  if ($period) {
-    $cache = cache_get('uom_fae_api:' . $hash, 'cache_uom_fae_api');
-  }
+	$hash = md5($query);
 
 	// Initialize
-	$result = NULL;
+  $result = NULL;
 
-  // Check for cached results.
-  if ($period && !empty($cache->data)) {
-    $result = $cache->data;
-  }
-  else {
-  	if(uom_fae_api_is_url_reachable()) {
-			$cache_id = 'uom_fae_api:empty:'. $hash;
-			$is_empty_query_result = cache_get($cache_id, 'cache_uom_fae_api')->data;
+	if(uom_fae_api_is_url_reachable()) {
+	
+		$cache_id = 'uom_fae_api:empty:'. $hash;
+    $is_empty_query_result = cache_get($cache_id, 'cache_uom_fae_api')->data;
 
-			if($is_empty_query_result == 1) {
-				// It was empty before, so don't query, but set it empty.
-				$result = '';
-			}
-			else {
-				// Someone may have $result array, but the $rows within are all empty.
-				// That means no tab will be displaying
-				$result = sparql_request($query, $endpoint);
+		// Detect whether result is empty or not.
+    if($is_empty_query_result == 1) {
+    	// It was empty before, so don't query, but set it empty.
+      $result = '';
+    }
+    else {
+      // Someone may have $result array, but the $rows within are all empty.
+      // That means no tab will be displaying
+      $result = sparql_request($query, $endpoint);
+    }
 
-				//test
-				//dsm($query);
-			}
+		if($result === NULL) {
+			// Throw dsm errors
+      $msg = 'sparql_request returns null. Possible error connection timed out after 30 seconds in ARC2_Reader. E.g. the grant query, but other query will be perfectly fine. Now this grant query becomes bottleneck. The page needs to wait for it to finish, then it starts to render itself. As a result, all tabs will be displayed except the grant tab.';
+      dsm('- start -');
+      dsm($msg);
+      dsm($query);
+      dsm('- end -');
 
-			if($result === NULL) {
-				// Throw dsm errors
-				$msg = 'sparql_request returns null. Possible error connection timed out after 30 seconds in ARC2_Reader. E.g. the grant query, but other query will be perfectly fine. Now this grant query becomes bottleneck. The page needs to wait for it to finish, then it starts to render itself. As a result, all tabs will be displayed except the grant tab.';
-				dsm('- start -');
-				dsm($msg);
-				dsm($query);
-				dsm('- end -');
+      // So this query returns empty result, we remember it as empty result, so next time we just load empty result.
+      $cache_id = 'uom_fae_api:empty:'. $hash;
+      cache_set($cache_id, 1, 'cache', time() + FAE_MODULE_CACHE_TIME);
 
-				// So this query returns empty result, we remember it as empty result, so next time we just load empty result. 
-				$cache_id = 'uom_fae_api:empty:'. $hash;
-				cache_set($cache_id, 1, 'cache_uom_fae_api', time() + FAE_MODULE_CACHE_TIME);	
-			}
-		  else if ($result['result'] === FALSE) {
-		    // If an error occurs, log it.
-		    drupal_set_message(t('FaE SparQL query error'), 'error');
-		    watchdog('uom_fae_api', $query, WATCHDOG_ERROR);
-
-		    // If we have cached results, use them instead.
-		    if (!empty($cache->data)) {
-		      $result = $cache->data;
-		    }
-		  }
-		  elseif (empty($result['result']) && !empty($cache->data)) {
-		    // Use cached results if we have them.
-		    $result = $cache->data;
-		  }
-		  elseif ($period) {
-		    // Caching is enabled, throw the result into the cache!
-		    cache_set('uom_fae_api:' . $hash, $result, 'cache_uom_fae_api', time() + $period);
-		    
-		    // Backup data
-		    $cache_id = 'uom_fae_api:query:'. $hash;
-		    uom_fae_api_custom_cache_set($cache_id, $result);
-		  }
+			$result = '';
 		}
-		else {
-			// In here, Joseki is definitely down.
-			dsm('Joseki is down. Use backup data for query result.');
-			$cache_id = 'uom_fae_api:query:'. $hash;
-			$result = uom_fae_api_custom_cache_get($cache_id);
-		}  
-  }
+		else if($result['result'] === FALSE) {
+			// Joseki returns false result, but joseki is reachable.
+			dsm('Empty result: Joseki returns false result, but joseki is reachable.');
+			$result = '';
+		}
+		else if(empty($result['result'])) {
+			// Really empty
+			dsm('Real empty result');
+			$result = '';	
+		}
+	}
+	else {
+		// Get result from backup data plan
+		// In here, Joseki is definitely down.
+    dsm('Joseki is down. Each tab use its cache data, which set in preprecess func');
+		$result = '';
+	}
 
 	if(!empty($result)) {
-  	// Allow the result to be rewritten.
-  	drupal_alter('uom_fae_api_query_result', $result);
+    // Allow the result to be rewritten.
+    drupal_alter('uom_fae_api_query_result', $result);
 
-		// Set it to non-empty
-		$cache_id = 'uom_fae_api:empty:'. $hash;
-		cache_set($cache_id, 0, 'cache_uom_fae_api', time() + FAE_MODULE_CACHE_TIME);
+		// So we have result, we remember it as non-empty.
+    $cache_id = 'uom_fae_api:empty:'. $hash;
+    cache_set($cache_id, 0, 'cache', time() + FAE_MODULE_CACHE_TIME);
 
-  	// Return the result.
-  	return $result['result'];
+    // Return the result.
+    return $result['result'];
   }
   else {
-  	return '';
-  }
+    return '';
+  }	
 }
 
 /**
@@ -619,8 +592,9 @@ function uom_fae_api_custom_cache_get($cache_id) {
 }
 
 function uom_fae_api_cache_and_backup($cache_id, $data) {
+	// Put it into cache
 	cache_set($cache_id, $data, 'cache', time() + FAE_MODULE_CACHE_TIME);
 		
-	// Update the backup data
+	// Put it into db 
 	uom_fae_api_custom_cache_set($cache_id, $data);
 }
