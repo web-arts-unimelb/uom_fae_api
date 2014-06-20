@@ -93,7 +93,7 @@ WHERE {
 	OPTIONAL {
     <:uri>  fae:overviewText4 ?overviewText4
   }
-}');
+} LIMIT 1');
 
 define('UOM_FAE_PERSON_AFFILIATION', '
 SELECT
