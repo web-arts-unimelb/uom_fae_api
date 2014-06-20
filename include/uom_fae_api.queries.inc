@@ -196,18 +196,18 @@ WHERE {
 }  
 ');
 
+// http://answers.semanticweb.com/questions/3245/convert-string-to-number
 define('UOM_FAE_PUBLICATION_PAGE_START_END', '
 SELECT
-	?pageStart ?pageEnd
+  ?pageStart ?pageEnd
 WHERE {
-	OPTIONAL {
-		<:uri> bibo:pageStart ?pageStart .
-	}
-	OPTIONAL {
-  	<:uri> bibo:pageEnd ?pageEnd .
-	}
-	FILTER(?pageEnd >= ?pageStart)
-}	
+  OPTIONAL {
+    <:uri> bibo:pageStart ?pageStart .
+  }
+  OPTIONAL {
+    <:uri> bibo:pageEnd ?pageEnd .
+  }
+}
 ');
 
 
