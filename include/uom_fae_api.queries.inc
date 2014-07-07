@@ -55,7 +55,7 @@ WHERE {
  */
 define('UOM_FAE_PERSON_CONTACT', '
 SELECT
-  ?email ?phone ?room ?building ?supervisor ?thumbnail ?image ?actualFilePart
+  ?email ?phone ?supervisor ?thumbnail ?image ?actualFilePart ?room ?building
 WHERE {
   OPTIONAL { <:uri> vivo:email ?email. }
   OPTIONAL { <:uri> fae:webpage ?webpage. }

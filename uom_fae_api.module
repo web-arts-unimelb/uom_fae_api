@@ -307,6 +307,9 @@ function uom_fae_api_query($query, $args = array()) {
   $query = trim(strtr($query, $args));
 	$hash = md5($query);
 
+	// Test 
+	// dsm($query);
+
 	// Initialize
   $result = NULL;
 
