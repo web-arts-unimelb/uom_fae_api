@@ -307,8 +307,8 @@ function uom_fae_api_query($query, $args = array()) {
   $query = trim(strtr($query, $args));
 	$hash = md5($query);
 
-	// Test 
-	// dsm($query);
+	// NOTE: don't delete, use it to test. 
+	//dsm($query);
 
 	// Initialize
   $result = NULL;
@@ -316,7 +316,7 @@ function uom_fae_api_query($query, $args = array()) {
 	if(uom_fae_api_is_url_reachable()) {
 	
 		$cache_id = 'uom_fae_api:empty:'. $hash;
-    $is_empty_query_result = cache_get($cache_id, 'cache_uom_fae_api')->data;
+		$is_empty_query_result = uom_fae_api_profile_custom_cache_get($cache_id);	
 
 		// Detect whether result is empty or not.
     if($is_empty_query_result == 1) {
@@ -339,7 +339,7 @@ function uom_fae_api_query($query, $args = array()) {
 
       // So this query returns empty result, we remember it as empty result, so next time we just load empty result.
       $cache_id = 'uom_fae_api:empty:'. $hash;
-      cache_set($cache_id, 1, 'cache', time() + FAE_MODULE_CACHE_TIME);
+			uom_fae_api_profile_custom_cache_set($cache_id, 1);
 
 			$result = '';
 		}
@@ -367,7 +367,7 @@ function uom_fae_api_query($query, $args = array()) {
 
 		// So we have result, we remember it as non-empty.
     $cache_id = 'uom_fae_api:empty:'. $hash;
-    cache_set($cache_id, 0, 'cache', time() + FAE_MODULE_CACHE_TIME);
+		uom_fae_api_profile_custom_cache_set($cache_id, 0);	
 
     // Return the result.
     return $result['result'];
@@ -596,8 +596,87 @@ function uom_fae_api_custom_cache_get($cache_id) {
 
 function uom_fae_api_cache_and_backup($cache_id, $data) {
 	// Put it into cache
-	cache_set($cache_id, $data, 'cache', time() + FAE_MODULE_CACHE_TIME);
+	// cache_set($cache_id, $data, 'cache', time() + FAE_MODULE_CACHE_TIME);
 		
 	// Put it into db 
 	uom_fae_api_custom_cache_set($cache_id, $data);
 }
+
+
+function uom_fae_api_profile_custom_cache_set($cache_id, $data) {
+	// http://stackoverflow.com/questions/8878779/sql-error-1406-data-too-long-for-column
+	// https://drupal.org/node/1676344
+	$table_name = 'fae_profile_custom_cache';
+	
+	if(!db_table_exists($table_name)) {
+		$sql = "
+			CREATE TABLE $table_name(
+				id INT(11) NOT NULL AUTO_INCREMENT,
+				cache_id VARCHAR(256) NOT NULL,
+				data LONGTEXT NOT NULL,
+				PRIMARY KEY ( id )
+			)
+		";
+		db_query($sql);
+	}
+		
+	// Select
+	$tmp_res = db_select($table_name, 'c')
+		->fields('c')
+    ->condition('cache_id', $cache_id, '=')	
+		->execute();
+ 
+	$json_data = json_encode($data);
+ 
+	if($tmp_res->rowCount() >= 1) {
+		//test
+		//dsm('update');
+	
+		// Update
+		$my_data = array(
+			'data' => $json_data,
+		);
+		
+		db_update($table_name)
+  		->fields($my_data)
+  		->condition('cache_id', $cache_id, '=')
+  		->execute();
+	}
+	else {
+		//test
+		//dsm('insert');
+	
+		// Insert
+		$my_data = array(
+			'cache_id' => $cache_id,
+			'data' => $json_data,
+		);
+		db_insert($table_name)
+			->fields($my_data)
+			->execute();
+	} 
+}
+
+
+function uom_fae_api_profile_custom_cache_get($cache_id) {
+	$data = '';
+	$table_name = 'fae_profile_custom_cache';
+	
+	if(db_table_exists($table_name)) {
+		$tmp_res = db_select($table_name, 'c')
+			->fields('c')
+		  ->condition('cache_id', $cache_id, '=')	
+			->execute();
+	
+		if($tmp_res->rowCount() >= 1) {
+			$result = $tmp_res->fetchAssoc();
+			$data = json_decode($result['data'], true);
+		}
+		else {
+			$data = '';
+		}
+	}
+	
+	return $data;	
+}
+
