@@ -27,6 +27,13 @@ function uom_fae_api_admin_menu_cache_info() {
     'title' => t('Find an Expert queries'),
     'callback' => '_uom_fae_api_cache_clear',
   );
+
+	// Gary
+	$caches['uom_fae_api_profile_remove'] = array(
+    'title' => t('Truncate FaE profile cache table'),
+    'callback' => '_uom_fae_api_profile_remove',
+  );
+
   return $caches;
 }
 
@@ -47,6 +54,15 @@ function _uom_fae_api_cache_clear($cid = NULL, $wildcard = FALSE) {
     }
     $query->execute();
   }
+}
+
+// Gary
+// Clear the profile cache table: fae_profile_custom_cache
+function _uom_fae_api_profile_remove($cid = NULL, $wildcard = FALSE) {
+	$callback_name = 'uom_fae_api_profile_remove';
+	if(!empty($cid) && $cid === $callback_name) {
+		db_delete('fae_profile_custom_cache')->execute();
+	}
 }
 
 /**
