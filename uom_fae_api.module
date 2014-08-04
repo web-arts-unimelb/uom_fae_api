@@ -307,9 +307,6 @@ function uom_fae_api_query($query, $args = array()) {
   $query = trim(strtr($query, $args));
 	$hash = md5($query);
 
-	// Test 
-	// dsm($query);
-
 	// Initialize
   $result = NULL;
 
@@ -343,9 +340,11 @@ function uom_fae_api_query($query, $args = array()) {
       dsm($query);
       dsm('- end -');
 
+			/*
       // So this query returns empty result, we remember it as empty result, so next time we just load empty result.
       $cache_id = 'uom_fae_api:empty:'. $hash;
       cache_set($cache_id, 1, 'cache', time() + FAE_MODULE_CACHE_TIME);
+			*/
 
 			$result = '';
 		}
@@ -358,9 +357,6 @@ function uom_fae_api_query($query, $args = array()) {
 			// Really empty
 			dsm('Real empty result');
 			$result = '';	
-		}
-		else if(isset($result['result']['rows']) && count($result['result']['rows']) <= 0 ) {
-			$result = '';
 		}
 	}
 	else {
@@ -505,6 +501,11 @@ function uom_fae_api_is_url_reachable() {
 	$condi = false;
 	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 	$ch = curl_init($url);
+
+	//http://stackoverflow.com/questions/2582057/setting-curls-timeout-in-php
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2); // In seconds
+	curl_setopt($ch, CURLOPT_TIMEOUT, 5); // In seconds
+
 	curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
 	curl_exec($ch);
