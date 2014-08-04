@@ -510,6 +510,7 @@ function uom_fae_api_is_url_reachable() {
 	$condi = false;
 	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2); 
 	curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
 	curl_exec($ch);
