@@ -311,23 +311,6 @@ function uom_fae_api_query($query, $args = array()) {
   $result = NULL;
 
 	if(uom_fae_api_is_url_reachable()) {
-	
-		$cache_id = 'uom_fae_api:empty:'. $hash;
-    //$is_empty_query_result = cache_get($cache_id, 'cache_uom_fae_api')->data;
-
-		/*
-		// Detect whether result is empty or not.
-    if($is_empty_query_result == 1) {
-    	// It was empty before, so don't query, but set it empty.
-      $result = '';
-    }
-    else {
-      // Someone may have $result array, but the $rows within are all empty.
-      // That means no tab will be displaying
-      $result = sparql_request($query, $endpoint);
-    }
-		*/
-
 		// Someone may have $result array, but the $rows within are all empty.
     // That means no tab will be displaying
     $result = sparql_request($query, $endpoint);
@@ -339,12 +322,6 @@ function uom_fae_api_query($query, $args = array()) {
       dsm($msg);
       dsm($query);
       dsm('- end -');
-
-			/*
-      // So this query returns empty result, we remember it as empty result, so next time we just load empty result.
-      $cache_id = 'uom_fae_api:empty:'. $hash;
-      cache_set($cache_id, 1, 'cache', time() + FAE_MODULE_CACHE_TIME);
-			*/
 
 			$result = '';
 		}
@@ -369,12 +346,6 @@ function uom_fae_api_query($query, $args = array()) {
 	if(!empty($result)) {
     // Allow the result to be rewritten.
     drupal_alter('uom_fae_api_query_result', $result);
-
-		/*
-		// So we have result, we remember it as non-empty.
-    $cache_id = 'uom_fae_api:empty:'. $hash;
-    cache_set($cache_id, 0, 'cache', time() + FAE_MODULE_CACHE_TIME);
-		*/
 
     // Return the result.
     return $result['result'];
