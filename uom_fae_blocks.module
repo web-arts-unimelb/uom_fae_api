@@ -297,7 +297,7 @@ function uom_fae_blocks_publications($uri) {
 		  
 		  // Cache it
 		  $data = $tmp_data['rows'];
-		  uom_fae_api_custom_cache_set($cache_id, $data);
+		  //uom_fae_api_custom_cache_set($cache_id, $data);
 		  uom_fae_api_profile_custom_cache_set($cache_id, $data);
 		}
 		else {

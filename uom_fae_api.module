@@ -490,10 +490,6 @@ function uom_fae_api_is_url_reachable() {
 	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 	$ch = curl_init($url);
 
-	//http://stackoverflow.com/questions/2582057/setting-curls-timeout-in-php
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2); // In seconds
-	curl_setopt($ch, CURLOPT_TIMEOUT, 5); // In seconds
-
 	curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
 	curl_exec($ch);
@@ -516,7 +512,7 @@ function uom_fae_api_is_url_reachable() {
 function uom_fae_api_custom_cache_set($cache_id, $data) {
 	// http://stackoverflow.com/questions/8878779/sql-error-1406-data-too-long-for-column
 	// https://drupal.org/node/1676344
-	$table_name = 'fae_custom_cache';
+	$table_name = 'fae_profile_custom_cache_clean_backup';
 	
 	if(!db_table_exists($table_name)) {
 		$sql = "
@@ -572,7 +568,7 @@ function uom_fae_api_custom_cache_get($cache_id) {
 	dsm('Joseki is down, Use backup data for page.');
 
 	$data = '';
-	$table_name = 'fae_custom_cache';
+	$table_name = 'fae_profile_custom_cache_clean_backup';
 	
 	if(db_table_exists($table_name)) {
 		$tmp_res = db_select($table_name, 'c')
@@ -680,3 +676,8 @@ function uom_fae_api_profile_custom_cache_get($cache_id) {
 	return $data;	
 }
 
+
+function fae_uom_my_watchdog($data = NULL) {
+	$msg = '<pre>'. print_r($data, TRUE). '</pre>';
+	watchdog('my_watchdog', $msg);
+}
