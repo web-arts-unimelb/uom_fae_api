@@ -509,6 +509,7 @@ function uom_fae_api_is_url_reachable() {
 }
 
 
+/* NOTE: clean bucket strategy, never dirty it.
 function uom_fae_api_custom_cache_set($cache_id, $data) {
 	// http://stackoverflow.com/questions/8878779/sql-error-1406-data-too-long-for-column
 	// https://drupal.org/node/1676344
@@ -562,6 +563,7 @@ function uom_fae_api_custom_cache_set($cache_id, $data) {
 			->execute();
 	} 
 }
+*/
 
 
 function uom_fae_api_custom_cache_get($cache_id) {
@@ -590,6 +592,8 @@ function uom_fae_api_custom_cache_get($cache_id) {
 	return $data;	
 }
 
+
+/* NOTE: clean bucket strategy, never dirty it.
 function uom_fae_api_cache_and_backup($cache_id, $data) {
 	// Put it into cache
 	// cache_set($cache_id, $data, 'cache', time() + FAE_MODULE_CACHE_TIME);
@@ -597,6 +601,7 @@ function uom_fae_api_cache_and_backup($cache_id, $data) {
 	// Put it into db 
 	uom_fae_api_custom_cache_set($cache_id, $data);
 }
+*/
 
 
 function uom_fae_api_profile_custom_cache_set($cache_id, $data) {
