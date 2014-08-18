@@ -81,9 +81,9 @@ define('UOM_FAE_PERSON_OVERVIEW', '
 SELECT
   ?overviewText1 ?overviewText2 ?overviewText3 ?overviewText4
 WHERE {
-  OPTIONAL {
+  #OPTIONAL {
     <:uri>  fae:overviewText1 ?overviewText1
-  }
+  #}
 	OPTIONAL {
     <:uri>  fae:overviewText2 ?overviewText2
   }
