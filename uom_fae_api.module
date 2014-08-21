@@ -332,6 +332,9 @@ function uom_fae_api_query($query, $args = array()) {
 	if(uom_fae_api_is_url_reachable()) {
     $result = sparql_request($query, $endpoint);
 
+		//test
+		//dsm($result);
+
 		if($result === NULL) {
 			// Throw dsm errors
       $msg = 'sparql_request returns null. Possible error connection timed out after 30 seconds in ARC2_Reader. E.g. the grant query, but other query will be perfectly fine. Now this grant query becomes bottleneck. The page needs to wait for it to finish, then it starts to render itself. As a result, all tabs will be displayed except the grant tab.';

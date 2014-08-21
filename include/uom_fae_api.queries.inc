@@ -109,6 +109,7 @@ WHERE {
   }
 }');
 
+/*
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 SELECT DISTINCT
   ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?edition ?parent ?isbn13 ?volume ?issueNum ?myIssueNum
@@ -149,6 +150,115 @@ WHERE {
   }
   FILTER regex(?type, "findanexpert")
 }');
+*/
+
+
+define('UOM_FAE_PERSON_PUBLICATIONS', '
+
+SELECT
+	(SAMPLE(?title) AS ?the_title)
+	(SAMPLE(?article) AS ?pub_uri)
+	(SAMPLE(?type) AS ?the_type)
+	(SAMPLE(?date_value) AS ?the_date_value)
+
+	(SAMPLE(?publish_org) AS ?the_publish_org)
+	(SAMPLE(?published_in) AS ?the_published_in)
+	(SAMPLE(?parent_title) AS ?the_parent_title)
+	(SAMPLE(?doi) AS ?the_doi)
+
+	(SAMPLE(?edition) AS ?the_edition)
+	(SAMPLE(?isbn13) AS ?the_isbn13)
+	(SAMPLE(?volume) AS ?the_volume)
+	(SAMPLE(?issue_num) AS ?the_issue_num)
+
+	(SAMPLE(?issue) AS ?the_issue)
+	(SAMPLE(?page_start) AS ?the_page_start)
+	(SAMPLE(?page_end) AS ?the_page_end)
+
+	(group_concat(distinct ?author_label ; separator="|" ) as ?the_author_label)
+	(group_concat(distinct ?author_posi_uri ; separator="|" ) as ?authors)
+	(group_concat(distinct ?the_author_link ; separator="|" ) as ?the_author_links)
+
+	(group_concat(distinct ?editor_label ; separator="|" ) as ?the_editor_label)
+	(group_concat(distinct ?editor_posi_uri ; separator="|" ) as ?editors)
+	(group_concat(distinct ?the_editor_link ; separator="|" ) as ?the_editor_links)
+
+where { 
+	<:uri> vivo:authorInAuthorship ?authorship .
+	?authorship vivo:linkedInformationResource ?article .
+	?article rdfs:label ?title.
+	?article vitro:mostSpecificType ?type .
+
+	?article vivo:dateTimeValue ?date_time_value .
+	?date_time_value vivo:dateTime ?date_value .	
+	?article vivo:publisher ?publisher .
+  ?publisher rdfs:label ?publish_org .
+
+	OPTIONAL {
+    ?article vivo:hasPublicationVenue ?pub_venue .
+    ?pub_venue rdfs:label ?published_in .
+  }
+
+	OPTIONAL {
+		?article fae:parentTitle ?parent_title
+	}
+	
+	OPTIONAL {
+    ?article bibo:doi ?doi
+  }
+  OPTIONAL {
+    ?article bibo:edition ?edition
+  }
+  OPTIONAL {
+    ?article bibo:isbn13 ?isbn13
+  }
+  OPTIONAL {
+    ?article bibo:volume ?volume
+  }
+  OPTIONAL {
+    ?article bibo:number ?issue_num
+  }
+	OPTIONAL {
+    ?article bibo:issue ?issue
+  }
+	OPTIONAL {
+    ?article bibo:pageStart ?page_start
+  }
+  OPTIONAL {
+    ?article bibo:pageEnd ?page_end
+  }  
+
+	# Get authors
+	?article vivo:informationResourceInAuthorship ?author_posi_uri .
+	filter strends( str(?author_posi_uri), "Y" ) .
+	?author_posi_uri rdfs:label ?author_label .
+
+	optional {
+		?author_posi_uri vivo:linkedAuthor ?author_link .
+	}
+	BIND ( IF( !bound(?author_link), "empty", STR(?author_link)) AS ?the_author_link ) .
+
+	# Get editors
+	optional {
+		?article vivo:informationResourceInAuthorship ?editor_posi_uri .
+		filter strends( str(?editor_posi_uri), "N" ) .
+		
+		optional {
+			?editor_posi_uri rdfs:label ?editor_label .
+		}
+
+		optional {
+			?editor_posi_uri vivo:linkedAuthor ?editor_link .   
+		}
+	}
+	BIND ( IF( !bound(?editor_link), "empty", STR(?editor_link)) AS ?the_editor_link ) .
+
+}
+group by ?article
+
+');
+
+
 
 // http://stackoverflow.com/questions/5161568/how-to-properly-use-sparql-optional-to-retrieve-attributes-for-a-resource-that-m
 // http://www.cambridgesemantics.com/semantic-university/sparql-nuts-and-bolts
