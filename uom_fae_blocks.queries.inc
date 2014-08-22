@@ -73,6 +73,7 @@ ORDER BY DESC(?dateTimeEnd) ASC(?dateTimeStart)');
 /**
  * Publications by people associated with a given organisation.
  */
+/*
 define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
 SELECT
   ?authorName ?authorRank ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?type ?myIssueNum
@@ -131,3 +132,52 @@ WHERE {
   FILTER regex(?type, "findanexpert")
 }
 ORDER BY ASC(?title)');
+*/
+
+define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
+SELECT
+	?article
+	(SAMPLE(?title) AS ?the_title)
+	(SAMPLE(?type) AS ?the_type)
+
+	(group_concat(distinct ?author_label ; separator="|" ) as ?the_author_label)
+	(group_concat(distinct ?author_posi_uri ; separator="|" ) as ?authors)
+
+	(group_concat(distinct ?editor_label ; separator="|" ) as ?the_editor_label)
+	(group_concat(distinct ?editor_posi_uri ; separator="|" ) as ?editors)
+		
+WHERE {
+	<http://www.findanexpert.unimelb.edu.au/individual/org94> rdfs:label ?org_label .
+  ?position vivo:positionInOrganization <:uri> .
+  ?person_uri vivo:personInPosition ?position .
+  ?person_uri vivo:authorInAuthorship ?pub_posi . 
+  
+  ?pub_posi vivo:linkedInformationResource ?article .
+  ?article rdfs:label ?title .
+  ?article vitro:mostSpecificType ?type .
+  
+  ?article vivo:dateTimeValue ?date_time_value .
+  ?date_time_value vivo:dateTime ?date_value .	
+  
+	# Get authors
+	?article vivo:informationResourceInAuthorship ?author_posi_uri .
+	FILTER regex(STR(?author_posi_uri), "Y$", "i")
+	?author_posi_uri rdfs:label ?author_label .
+  
+  optional {
+		?author_posi_uri vivo:linkedAuthor ?author_link .
+	}
+
+  # Get editors
+  optional {
+		?article vivo:informationResourceInAuthorship ?editor_posi_uri .
+		FILTER regex(STR(?editor_posi_uri), "N$", "i") .
+		?editor_posi_uri rdfs:label ?editor_label .
+	}
+	
+  FILTER (?date_value >= ":prevYear-01-01T00:00:00Z"^^xsd:dateTime)
+  FILTER (?date_value  < ":currYear-01-01T00:00:00Z"^^xsd:dateTime)
+}
+GROUP BY ?article
+
+');
