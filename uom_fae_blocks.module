@@ -313,6 +313,7 @@ function uom_fae_blocks_publications($uri) {
 
 
 function uom_fae_blocks_publications($uri) {
+	$box = array();
 	$data = '';
   $args = func_get_args();
   
@@ -341,7 +342,52 @@ function uom_fae_blocks_publications($uri) {
         return NULL;
       }
 
-	
+			foreach($tmp_data['rows'] as $pub) {
+				// Prepare
+				$author_text = _faeprofile_person_text($pub['the_author_label'], $pub['authors']);					
+				$editor_text = _faeprofile_person_text($pub['the_editor_label'], $pub['editors']);
+
+				$type_array = _faeprofile_publication_type($pub['the_type']);
+        $page_start_end_text = _faeprofile_page_start_end($pub['the_page_start'], $pub['the_page_end']);
+
+				
+				// Actual data
+        $tmp = array(
+        	'title' => $pub['the_title'],
+          'pub_uri' => $pub['article'],
+
+          'type_code' => $type_array['type_code'],
+          'type_text' => $type_array['type_text'],
+
+          'date' => '',
+          'year' => '',
+
+          'publish_org' => $pub['the_publish_org'],
+          'published_in' => $pub['the_published_in'],
+          'parent_title' => $pub['the_parent_title'],
+
+          'edition' => $pub['the_edition'],
+          'isbn13' => '',
+          'volume' => $pub['the_volume'],
+          'issue_num' => '',
+          'issue' => $pub['the_issue'],
+          'page_start_end' => $page_start_end_text,
+
+          'author_text' => $author_text,
+          'editor_text' => $editor_text,
+        );
+
+				$box['categories'][$tmp['type_text']][$tmp['pub_uri']] = _faeprofile_publication_select_theme($tmp);
+			}
+
+  		// Sort
+  		foreach($box['categories'] as &$cat) {
+    		ksort($cat);
+  		}
+
+			// Cache it
+      $data = $box;
+      uom_fae_api_profile_custom_cache_set($cache_id, $data);
 		}
 		else {
       // Joseki is down, so get the backup data
@@ -350,6 +396,7 @@ function uom_fae_blocks_publications($uri) {
     }
 	} // End if
 
+	return theme('uom_fae_blocks_publications', array('data' => $data, 'uri' => $uri));
 }
 
 
@@ -411,6 +458,7 @@ function template_preprocess_uom_fae_blocks_research(&$vars) {
 /**
  * Implements template_preprocess_uom_fae_blocks_publications().
  */
+/*
 function template_preprocess_uom_fae_blocks_publications(&$vars) {
 
   // Early return with empty vars if there are no items to process.
@@ -472,6 +520,18 @@ function template_preprocess_uom_fae_blocks_publications(&$vars) {
 		ksort($cat);
 	}
 }
+*/
+
+
+/**
+ * Implements template_preprocess_uom_fae_blocks_publications().
+ */
+function template_preprocess_uom_fae_blocks_publications(&$vars) {
+
+	//test
+	//dsm($vars);
+}
+
 
 /**
  * Theme functions for the FaE blocks.
@@ -541,9 +601,10 @@ function theme_uom_fae_blocks_publications($variables) {
   $output = '';
   $rows = array();
 
-  foreach($variables['categories'] as $category => $publications) {
+  foreach($variables['data']['categories'] as $category => $publications) {
     $output .= theme('item_list', array('items' => $publications, 'title' =>  $category));
   }
+
   return $output;
 }
 

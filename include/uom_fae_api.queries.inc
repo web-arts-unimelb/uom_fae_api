@@ -81,9 +81,8 @@ define('UOM_FAE_PERSON_OVERVIEW', '
 SELECT
   ?overviewText1 ?overviewText2 ?overviewText3 ?overviewText4
 WHERE {
-  #OPTIONAL {
-    <:uri>  fae:overviewText1 ?overviewText1
-  #}
+  <:uri>  fae:overviewText1 ?overviewText1
+
 	OPTIONAL {
     <:uri>  fae:overviewText2 ?overviewText2
   }
@@ -262,7 +261,7 @@ group by ?article
 
 // http://stackoverflow.com/questions/5161568/how-to-properly-use-sparql-optional-to-retrieve-attributes-for-a-resource-that-m
 // http://www.cambridgesemantics.com/semantic-university/sparql-nuts-and-bolts
-
+/*
 define('UOM_FAE_PUBLICATION_AUTHOR_PUB_POSIS', '
 SELECT
   ?pubPosi
@@ -271,7 +270,9 @@ WHERE {
 }
 ORDER BY ?pubPosi 
 ');
+*/
 
+/*
 define('UOM_FAE_PUBLICATION_AUTHOR_PERSON_LINK', '
 SELECT
   ?personLink
@@ -279,7 +280,9 @@ WHERE {
   <:uri> vivo:linkedAuthor ?personLink.
 }
 ');
+*/
 
+/*
 define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL', '
 SELECT
   ?personLabel
@@ -287,8 +290,9 @@ WHERE {
   <:uri> rdfs:label ?personLabel.
 }   
 ');
+*/
 
-
+/*
 define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL_1', '
 SELECT
   ?personLabel
@@ -296,8 +300,9 @@ WHERE {
   <:uri> vivo:authorNameAsListed ?personLabel.
 }   
 ');
+*/
 
-
+/*
 define('UOM_FAE_PUBLICATION_EDITOR_NAME', '
 SELECT
 	?editorName
@@ -305,8 +310,10 @@ WHERE {
 	<:uri> rdfs:label ?editorName .
 }  
 ');
+*/
 
 // http://answers.semanticweb.com/questions/3245/convert-string-to-number
+/*
 define('UOM_FAE_PUBLICATION_PAGE_START_END', '
 SELECT
   ?pageStart ?pageEnd
@@ -319,7 +326,7 @@ WHERE {
   }
 }
 ');
-
+*/
 
 define('UOM_FAE_PERSON_RESEARCH', '
 SELECT
@@ -351,9 +358,8 @@ define('UOM_FAE_PERSON_EXTRA_GRANT', '
 SELECT
 	?extraGrantText1 ?extraGrantText2 ?extraGrantText3 ?extraGrantText4
 WHERE {
-	OPTIONAL {
-		<:uri> fae:extraGrantText1 ?extraGrantText1
-	}
+	<:uri> fae:extraGrantText1 ?extraGrantText1
+
 	OPTIONAL {
 		<:uri> fae:extraGrantText2 ?extraGrantText2
 	}
