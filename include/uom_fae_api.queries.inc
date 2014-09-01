@@ -94,6 +94,7 @@ WHERE {
   }
 } LIMIT 1');
 
+/*
 define('UOM_FAE_PERSON_AFFILIATION', '
 SELECT
   ?orgLabel ?roleLabel ?dateValue
@@ -107,6 +108,36 @@ WHERE {
     ?dateTimeValue vivo:dateTime ?dateValue .
   }
 }');
+*/
+
+
+define('UOM_FAE_PERSON_AFFILIATION', '
+
+SELECT
+  ?org_label ?role_label ?the_start_time ?the_end_time
+WHERE {
+  <:uri> vivo:hasMemberRole ?role .
+  ?role vivo:roleIn ?role_org .
+  ?role rdfs:label ?role_label .
+  ?role_org rdfs:label ?org_label .
+  
+  OPTIONAL {
+  	?role vivo:dateTimeInterval ?date_time_value .
+  
+		OPTIONAL {	
+  		?date_time_value vivo:start ?start_time .
+  		?start_time vivo:dateTime ?the_start_time .
+		}
+
+		OPTIONAL {
+			?date_time_value vivo:end ?end_time .
+  		?end_time vivo:dateTime ?the_end_time .
+		}
+  }
+}
+
+');
+
 
 /*
 define('UOM_FAE_PERSON_PUBLICATIONS', '
