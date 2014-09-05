@@ -221,8 +221,11 @@ where {
 
 	?article vivo:dateTimeValue ?date_time_value .
 	?date_time_value vivo:dateTime ?date_value .	
-	?article vivo:publisher ?publisher .
-  ?publisher rdfs:label ?publish_org .
+	
+	OPTIONAL {
+		?article vivo:publisher ?publisher .
+  	?publisher rdfs:label ?publish_org .
+	}
 
 	OPTIONAL {
     ?article vivo:hasPublicationVenue ?pub_venue .
@@ -260,7 +263,7 @@ where {
 
 	# Get authors
 	?article vivo:informationResourceInAuthorship ?author_posi_uri .
-	filter strends( str(?author_posi_uri), "Y" ) .
+	FILTER regex(STR(?author_posi_uri), "Y$", "i") .
 	?author_posi_uri rdfs:label ?author_label .
 
 	optional {
@@ -271,7 +274,7 @@ where {
 	# Get editors
 	optional {
 		?article vivo:informationResourceInAuthorship ?editor_posi_uri .
-		filter strends( str(?editor_posi_uri), "N" ) .
+		FILTER regex(STR(?editor_posi_uri), "N$", "i") .	
 		
 		optional {
 			?editor_posi_uri rdfs:label ?editor_label .

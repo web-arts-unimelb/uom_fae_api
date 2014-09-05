@@ -171,10 +171,15 @@ WHERE {
   
   ?article vivo:dateTimeValue ?date_time_value .
   ?date_time_value vivo:dateTime ?date_value .	
-  
-  ?article vivo:publisher ?publisher .
-  ?publisher rdfs:label ?publish_org .
-  
+
+	# NOTE:
+	# Drawback: even we know some publication type wont have ?publisher,
+  # putting optional will timeout this query. 
+	#OPTIONAL { 
+  	?article vivo:publisher ?publisher .
+  	?publisher rdfs:label ?publish_org .
+	#}  
+
   OPTIONAL {
     ?article vivo:hasPublicationVenue ?pub_venue .
     ?pub_venue rdfs:label ?published_in .
