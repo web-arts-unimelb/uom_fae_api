@@ -75,11 +75,12 @@ WHERE {
   }
 } LIMIT 1');
 
+/*
 // Note: remove <http://www.findanexpert.unimelb.edu.au/individual/person625285> rdf:type vivo:FacultyMember
 // It doesn't have vivo:FacultyMember
 define('UOM_FAE_PERSON_OVERVIEW', '
 SELECT
-  ?overviewText1 ?overviewText2 ?overviewText3 ?overviewText4
+  ?overviewText1 ?overviewText2 overviewText3 ?overviewText4
 WHERE {
   <:uri>  fae:overviewText1 ?overviewText1
 
@@ -93,6 +94,20 @@ WHERE {
     <:uri>  fae:overviewText4 ?overviewText4
   }
 } LIMIT 1');
+*/
+
+
+define('UOM_FAE_PERSON_OVERVIEW', '
+SELECT
+  ?overviewText1 ?overviewText2
+WHERE {
+  <:uri>  fae:overviewText1 ?overviewText1
+
+  OPTIONAL {
+    <:uri>  fae:overviewText2 ?overviewText2
+  }
+} LIMIT 1');
+
 
 /*
 define('UOM_FAE_PERSON_AFFILIATION', '
