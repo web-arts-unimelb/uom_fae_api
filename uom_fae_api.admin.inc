@@ -32,7 +32,7 @@ function uom_fae_api_admin_form() {
     '#type' => 'select',
     '#options' => $timeout,
     '#required' => TRUE,
-    '#default_value' => variable_get('uom_fae_api_timeout', 15),
+    '#default_value' => variable_get('uom_fae_api_timeout', 10),
   );
 
   $form['uom_fae_api_qid'] = array(
