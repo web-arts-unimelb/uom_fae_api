@@ -20,6 +20,7 @@ function uom_fae_api_admin_form() {
   $timeout = array(
     '5'  => t('5 seconds'),
     '10' => t('10 seconds'),
+		'15' => t('15 seconds'),
     '20' => t('20 seconds'),
     '30' => t('30 seconds'),
     '45' => t('45 seconds'),
@@ -31,7 +32,7 @@ function uom_fae_api_admin_form() {
     '#type' => 'select',
     '#options' => $timeout,
     '#required' => TRUE,
-    '#default_value' => variable_get('uom_fae_api_timeout', 30),
+    '#default_value' => variable_get('uom_fae_api_timeout', 15),
   );
 
   $form['uom_fae_api_qid'] = array(

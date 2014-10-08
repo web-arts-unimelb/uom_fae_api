@@ -297,7 +297,7 @@ function uom_fae_api_uom_fae_api_query_alter(&$query, &$args) {
   $query = FAE_QUERY_PREFIX . $query;
 
   $defaults = array(
-    ':timeout' => variable_get('uom_fae_api_timeout', 30),
+    ':timeout' => variable_get('uom_fae_api_timeout', 15),
     ':qid' => variable_get('uom_fae_api_qid', 'uom-fae-api'),
   );
   $args += $defaults;
