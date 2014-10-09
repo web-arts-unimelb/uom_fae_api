@@ -555,6 +555,9 @@ WHERE
   
   if($tmp_condi === FALSE) {
   	$condi = FALSE;
+
+		// Log
+		uom_fae_api_curl_log($curl);
   }
 	else {
 		$condi = TRUE;
@@ -562,6 +565,24 @@ WHERE
   curl_close($curl);
 
 	return $condi;
+}
+
+
+function uom_fae_api_curl_log($curl) {
+	$info = print_r(curl_getinfo($curl), TRUE);
+	$errno = curl_errno($curl);
+	$error = curl_error($curl);
+	$date = date('Y-m-d H:i:s');
+
+	// http://stackoverflow.com/questions/3066421/writing-a-new-line-to-file-in-php
+	$sep = " | ";
+	$msg = $date. $sep. $info. $sep. $errno. $sep. $error. "\n\n";
+
+	$file_dir = dirname(__FILE__);	
+	$file_name = $file_dir. '/uom_fae_api_curl_log.txt';
+
+	$condi = file_put_contents($file_name, $msg, FILE_APPEND);
+
 }
 
 
