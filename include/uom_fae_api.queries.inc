@@ -75,27 +75,6 @@ WHERE {
   }
 } LIMIT 1');
 
-/*
-// Note: remove <http://www.findanexpert.unimelb.edu.au/individual/person625285> rdf:type vivo:FacultyMember
-// It doesn't have vivo:FacultyMember
-define('UOM_FAE_PERSON_OVERVIEW', '
-SELECT
-  ?overviewText1 ?overviewText2 overviewText3 ?overviewText4
-WHERE {
-  <:uri>  fae:overviewText1 ?overviewText1
-
-	OPTIONAL {
-    <:uri>  fae:overviewText2 ?overviewText2
-  }
-	OPTIONAL {
-    <:uri>  fae:overviewText3 ?overviewText3
-  }
-	OPTIONAL {
-    <:uri>  fae:overviewText4 ?overviewText4
-  }
-} LIMIT 1');
-*/
-
 
 define('UOM_FAE_PERSON_OVERVIEW', '
 SELECT
@@ -109,23 +88,6 @@ WHERE {
     <:uri>  fae:overviewText2 ?overviewText2
   }
 } LIMIT 1');
-
-
-/*
-define('UOM_FAE_PERSON_AFFILIATION', '
-SELECT
-  ?orgLabel ?roleLabel ?dateValue
-WHERE {
-  <:uri> vivo:hasMemberRole ?role .
-  ?role vivo:roleIn ?roleOrg .
-  ?role rdfs:label ?roleLabel .
-  ?roleOrg rdfs:label ?orgLabel .
-  OPTIONAL {
-    ?role vivo:dateTimeValue ?dateTimeValue .
-    ?dateTimeValue vivo:dateTime ?dateValue .
-  }
-}');
-*/
 
 
 define('UOM_FAE_PERSON_AFFILIATION', '
@@ -156,50 +118,6 @@ WHERE {
 ');
 
 
-/*
-define('UOM_FAE_PERSON_PUBLICATIONS', '
-SELECT DISTINCT
-  ?publication ?article ?targetPersonName ?title ?type ?dateValue ?publishOrg ?doi ?edition ?parent ?isbn13 ?volume ?issueNum ?myIssueNum
-WHERE {
-  <:uri> vivo:authorInAuthorship ?authorship .
-	<:uri> rdfs:label ?targetPersonName .
-  ?authorship vivo:linkedInformationResource ?article .
-  ?article rdfs:label ?title .
-  ?article rdf:type ?type .
-  ?article vivo:dateTimeValue ?dateTimeValue .
-  ?dateTimeValue vivo:dateTime ?dateValue .
-  ?article vivo:publisher ?publisher .
-  ?publisher rdfs:label ?publishOrg .
-  OPTIONAL {
-    ?article vivo:hasPublicationVenue ?pubVenue .
-    ?pubVenue rdfs:label ?publication .
-  }
-  OPTIONAL {
-    ?article bibo:doi ?doi
-  }
-  OPTIONAL {
-    ?article bibo:edition ?edition
-  }
-	OPTIONAL {
-		?article fae:parentTitle ?parent
-	}
-  OPTIONAL {
-    ?article bibo:isbn13 ?isbn13
-  }
-  OPTIONAL {
-    ?article bibo:volume ?volume
-  }
-	OPTIONAL {
-    ?article bibo:number ?issueNum
-  }
-	OPTIONAL {
-    ?article bibo:issue ?myIssueNum
-  }
-  FILTER regex(?type, "findanexpert")
-}');
-*/
-
-
 define('UOM_FAE_PERSON_PUBLICATIONS', '
 
 SELECT
@@ -222,13 +140,13 @@ SELECT
 	(SAMPLE(?page_start) AS ?the_page_start)
 	(SAMPLE(?page_end) AS ?the_page_end)
 
-	(group_concat(distinct ?author_label ; separator="|" ) as ?the_author_label)
-	(group_concat(distinct ?author_posi_uri ; separator="|" ) as ?authors)
-	(group_concat(distinct ?the_author_link ; separator="|" ) as ?the_author_links)
+	(group_concat( ?author_label ; separator="|" ) as ?the_author_label)
+	(group_concat( ?author_posi_uri ; separator="|" ) as ?authors)
+	(group_concat( ?the_author_link ; separator="|" ) as ?the_author_links)
 
-	(group_concat(distinct ?editor_label ; separator="|" ) as ?the_editor_label)
-	(group_concat(distinct ?editor_posi_uri ; separator="|" ) as ?editors)
-	(group_concat(distinct ?the_editor_link ; separator="|" ) as ?the_editor_links)
+	(group_concat( ?editor_label ; separator="|" ) as ?the_editor_label)
+	(group_concat( ?editor_posi_uri ; separator="|" ) as ?editors)
+	(group_concat( ?the_editor_link ; separator="|" ) as ?the_editor_links)
 
 where { 
 	<:uri> vivo:authorInAuthorship ?authorship .
@@ -309,76 +227,6 @@ group by ?article
 ');
 
 
-
-// http://stackoverflow.com/questions/5161568/how-to-properly-use-sparql-optional-to-retrieve-attributes-for-a-resource-that-m
-// http://www.cambridgesemantics.com/semantic-university/sparql-nuts-and-bolts
-/*
-define('UOM_FAE_PUBLICATION_AUTHOR_PUB_POSIS', '
-SELECT
-  ?pubPosi
-WHERE {
-  <:uri> vivo:informationResourceInAuthorship ?pubPosi.
-}
-ORDER BY ?pubPosi 
-');
-*/
-
-/*
-define('UOM_FAE_PUBLICATION_AUTHOR_PERSON_LINK', '
-SELECT
-  ?personLink
-WHERE {
-  <:uri> vivo:linkedAuthor ?personLink.
-}
-');
-*/
-
-/*
-define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL', '
-SELECT
-  ?personLabel
-WHERE {
-  <:uri> rdfs:label ?personLabel.
-}   
-');
-*/
-
-/*
-define('UOM_FAE_PUBLICATION_AUTHOR_NAME_LABEL_1', '
-SELECT
-  ?personLabel
-WHERE {
-  <:uri> vivo:authorNameAsListed ?personLabel.
-}   
-');
-*/
-
-/*
-define('UOM_FAE_PUBLICATION_EDITOR_NAME', '
-SELECT
-	?editorName
-WHERE {
-	<:uri> rdfs:label ?editorName .
-}  
-');
-*/
-
-// http://answers.semanticweb.com/questions/3245/convert-string-to-number
-/*
-define('UOM_FAE_PUBLICATION_PAGE_START_END', '
-SELECT
-  ?pageStart ?pageEnd
-WHERE {
-  OPTIONAL {
-    <:uri> bibo:pageStart ?pageStart .
-  }
-  OPTIONAL {
-    <:uri> bibo:pageEnd ?pageEnd .
-  }
-}
-');
-*/
-
 define('UOM_FAE_PERSON_RESEARCH', '
 SELECT
   ?grant ?grantLabel ?grantScheme ?roleLabel ?orgLabel ?dateStart ?dateEnd
@@ -437,21 +285,6 @@ WHERE {
   }
 }');
 
-/*
-define('UOM_FAE_PERSON_LINKAGES', '
-SELECT
-  ?org ?orgLabel ?roleLabel ?dateValue
-WHERE {
-  <:uri> fae:internationalLinkageRole ?role .
-  ?role rdfs:label ?roleLabel .
-  ?role vivo:roleIn ?org .
-  ?org rdfs:label ?orgLabel .
-  OPTIONAL {
-    ?role vivo:dateTimeValue ?dateTimeValue .
-    ?dateTimeValue vivo:dateTime ?dateValue .
-  }
-}');
-*/
 
 define('UOM_FAE_PERSON_LINKAGES_NO_ORG_LABEL', '
 SELECT
