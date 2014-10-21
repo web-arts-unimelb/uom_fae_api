@@ -515,15 +515,13 @@ function uom_fae_api_is_url_reachable() {
 // http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 // http://stackoverflow.com/questions/16452636/php-curl-what-does-curl-exec-return
 function uom_fae_api_is_url_reachable() {
-	
 	// Early check
-	if(uom_fae_api_is_url_idle()) {
-		return true;
+	if(uom_fae_api_is_url_reachable_1()) {
+		// Continue	
 	}
 	else {
 		return false;
 	}
-
 
 	$condi = FALSE;
 
@@ -565,8 +563,8 @@ WHERE
   if($tmp_condi === FALSE) {
   	$condi = FALSE;
 
-		// Log
-		uom_fae_api_curl_log($curl);
+		// Gary: in case the log gets too big 
+		//uom_fae_api_curl_log($curl);
   }
 	else {
 		$condi = TRUE;
@@ -577,7 +575,7 @@ WHERE
 }
 
 
-function uom_fae_api_is_url_idle() {
+function uom_fae_api_is_url_reachable_1() {
 	// http://128.250.202.125:7001/joseki/oracle
   $tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
   $end_len = strlen('/oracle');
