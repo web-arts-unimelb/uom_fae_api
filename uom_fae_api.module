@@ -515,17 +515,25 @@ function uom_fae_api_is_url_reachable() {
 // http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 // http://stackoverflow.com/questions/16452636/php-curl-what-does-curl-exec-return
 function uom_fae_api_is_url_reachable() {
+	
+	// Early check
+	if(uom_fae_api_is_url_idle()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
+
 	$condi = FALSE;
 
 	// http://128.250.202.125:7001/joseki/oracle
   $tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
 
-	/*
-  $end_len = strlen('/oracle');
-  $full_len = strlen($tmp_url);
-  $needed_len = $full_len - $end_len;
-  $url = substr($tmp_url, 0, $needed_len);
-	*/
+  //$end_len = strlen('/oracle');
+  //$full_len = strlen($tmp_url);
+  //$needed_len = $full_len - $end_len;
+  //$url = substr($tmp_url, 0, $needed_len);
 
 	$url = $tmp_url;
   $curl = curl_init($url);
@@ -551,6 +559,7 @@ WHERE
   curl_setopt($curl, CURLOPT_POST, 1);
   curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // Basically no output in command line
+
   $tmp_condi = curl_exec($curl);
   
   if($tmp_condi === FALSE) {
@@ -566,6 +575,41 @@ WHERE
 
 	return $condi;
 }
+
+
+function uom_fae_api_is_url_idle() {
+	// http://128.250.202.125:7001/joseki/oracle
+  $tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
+  $end_len = strlen('/oracle');
+  $full_len = strlen($tmp_url);
+  $needed_len = $full_len - $end_len;
+
+  $url = substr($tmp_url, 0, $needed_len);
+
+  $condi = false;
+  // http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
+  $ch = curl_init($url);
+
+  curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
+  curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 0);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+  
+  curl_exec($ch);
+  if(
+    curl_getinfo($ch, CURLINFO_HTTP_CODE) == 200 ||
+    curl_getinfo($ch, CURLINFO_HTTP_CODE) == 301 ||
+    curl_getinfo($ch, CURLINFO_HTTP_CODE) == 302
+  ) {
+    $condi = true;
+  }
+  else {
+    $condi = false;
+  }
+
+	return $condi;
+}
+
 
 
 function uom_fae_api_curl_log($curl) {
