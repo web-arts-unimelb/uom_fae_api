@@ -321,7 +321,7 @@ function uom_fae_api_query($query, $args = array()) {
 
   // Replace vars.
   $query = trim(strtr($query, $args));
-	$hash = md5($query);
+	//$hash = md5($query);
 
 	// NOTE: don't delete, use it to test. 
 	//dsm($query);
