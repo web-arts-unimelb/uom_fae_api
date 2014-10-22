@@ -268,8 +268,9 @@ function uom_fae_blocks_publications($uri) {
 	$data = uom_fae_api_profile_custom_cache_get($cache_id);
 
 	if(empty($data)) {
-		if(uom_fae_api_is_url_reachable()) {
-		
+		//if(uom_fae_api_is_url_reachable()) {
+		$uom_fae_api_is_url_reachable = variable_get('uom_fae_api_is_url_reachable', FALSE);
+    if($uom_fae_api_is_url_reachable) {
 			$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
 				':uri' => $uri,
 				':currYear' => sprintf("%04d", $currYear + 1),
@@ -331,7 +332,9 @@ function uom_fae_blocks_publications($uri) {
   $data = uom_fae_api_profile_custom_cache_get($cache_id);
 
 	if(empty($data)) {
-		if(uom_fae_api_is_url_reachable()) {
+		//if(uom_fae_api_is_url_reachable()) {
+		$uom_fae_api_is_url_reachable = variable_get('uom_fae_api_is_url_reachable', FALSE);
+    if($uom_fae_api_is_url_reachable) {
 			$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
         ':uri' => $uri,
         ':currYear' => sprintf("%04d", $currYear + 1),

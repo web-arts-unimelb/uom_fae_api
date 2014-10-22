@@ -331,6 +331,7 @@ function uom_fae_api_query($query, $args = array()) {
 
 	if(uom_fae_api_is_url_reachable()) {
     $result = sparql_request($query, $endpoint);
+		variable_set('uom_fae_api_is_url_reachable', TRUE);
 
 		//test
 		//dsm($result);
@@ -361,6 +362,7 @@ function uom_fae_api_query($query, $args = array()) {
 		// In here, Joseki is definitely down.
     dsm('Joseki is down. Each tab use its cache data, which set in preprecess func');
 		$result = '';
+		variable_set('uom_fae_api_is_url_reachable', FALSE);
 	}
 
 	if(!empty($result)) {
