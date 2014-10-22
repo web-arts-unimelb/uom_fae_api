@@ -107,9 +107,12 @@ function uom_fae_api_permission() {
  * Return overview information for a person.
  */
 function uom_fae_api_person_overview($uri, $args = array()) {
+	$cache_id = "faeprofile:overview:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -122,8 +125,11 @@ function uom_fae_api_person_overview($uri, $args = array()) {
  * Return a person's affiliation.
  */
 function uom_fae_api_person_affiliation($uri, $args = array()) {
+	$cache_id = "faeprofile:affiliation:$uri:". md5($uri);
+
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -136,9 +142,12 @@ function uom_fae_api_person_affiliation($uri, $args = array()) {
  * Return a person's publications.
  */
 function uom_fae_api_person_publications($uri, $args = array()) {
+	$cache_id = "faeprofile:pub:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -151,9 +160,12 @@ function uom_fae_api_person_publications($uri, $args = array()) {
  * Return a person's research.
  */
 function uom_fae_api_person_research($uri, $args = array()) {
+	$cache_id = "faeprofile:research:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -166,9 +178,12 @@ function uom_fae_api_person_research($uri, $args = array()) {
  * Return a person's awards.
  */
 function uom_fae_api_person_awards($uri, $args = array()) {
+	$cache_id = "faeprofile:award:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -230,9 +245,12 @@ function uom_fae_api_person_linkages_org_label($uri, $args = array()) {
  * Return a person's supervision.
  */
 function uom_fae_api_person_supervision($uri, $args = array()) {
+	$cache_id = "faeprofile:supervision:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -245,9 +263,12 @@ function uom_fae_api_person_supervision($uri, $args = array()) {
  * Return contact information for a block on a person's profile.
  */
 function uom_fae_api_person_contact($uri, $args = array()) {
+	$cache_id = "faeprofile:contact:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -260,9 +281,12 @@ function uom_fae_api_person_contact($uri, $args = array()) {
  * Return qualification information for a block on a person's profile.
  */
 function uom_fae_api_person_qualifications($uri, $args = array()) {
+	$cache_id = "faeprofile:qualification:$uri:". md5($uri);
+
   // Mash in default arguments.
   $defaults = array(
     ':uri' => $uri,
+		'cache_id' => $cache_id,
   );
   $args += $defaults;
 
@@ -314,6 +338,14 @@ function uom_fae_api_query($query, $args = array()) {
   $endpoint = new stdClass();
   $endpoint->uri = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
 
+	// Cache id
+	if(isset($args['cache_id'])) {
+		$cache_id = $args['cache_id'];	
+	}
+	else {
+		$cache_id = FALSE;
+	}
+
   // Modify the query and query argument.
   //
   // @see uom_fae_api_uom_fae_api_query_alter()
@@ -321,7 +353,6 @@ function uom_fae_api_query($query, $args = array()) {
 
   // Replace vars.
   $query = trim(strtr($query, $args));
-	//$hash = md5($query);
 
 	// NOTE: don't delete, use it to test. 
 	//dsm($query);
@@ -330,11 +361,22 @@ function uom_fae_api_query($query, $args = array()) {
   $result = NULL;
 
 	if(uom_fae_api_is_url_reachable()) {
-    $result = sparql_request($query, $endpoint);
-		variable_set('uom_fae_api_is_url_reachable', TRUE);
+		$cache_data = uom_fae_api_profile_custom_cache_get($cache_id);
+		if(!empty($cache_data) && $cache_id !== FALSE) {
+			//test
+			//dsm("gary: use cache data");			
+	
+			// Set it empty, so we can use cache data.
+      $result = '';
+		}
+		else {
+			//test
+      //dsm("jo: use joski data");			
 
-		//test
-		//dsm($result);
+			$result = sparql_request($query, $endpoint);
+		}
+
+		variable_set('uom_fae_api_is_url_reachable', TRUE);
 
 		if($result === NULL) {
 			// Throw dsm errors
@@ -346,6 +388,9 @@ function uom_fae_api_query($query, $args = array()) {
 
 			$result = '';
 		}
+		else if(empty($result)) {
+      // It means using cache data    
+    }
 		else if($result['result'] === FALSE) {
 			// Joseki returns false result, but joseki is reachable.
 			dsm('Empty result: Joseki returns false result, but joseki is reachable.');
