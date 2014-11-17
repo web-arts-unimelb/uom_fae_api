@@ -364,14 +364,14 @@ function uom_fae_api_query($query, $args = array()) {
 		$cache_data = uom_fae_api_profile_custom_cache_get($cache_id);
 		if(!empty($cache_data) && $cache_id !== FALSE) {
 			//test
-			//dsm("gary: use cache data");			
+			//dsm("use cache data: $cache_id");			
 	
 			// Set it empty, so we can use cache data.
       $result = '';
 		}
 		else {
 			//test
-      //dsm("jo: use joski data");			
+      //dsm("use joski data: $cache_id");			
 
 			$result = sparql_request($query, $endpoint);
 		}
