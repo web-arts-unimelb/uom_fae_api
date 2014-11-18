@@ -605,6 +605,10 @@ WHERE
   curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // Basically no output in command line
 
+	// http://stackoverflow.com/questions/2582057/setting-curls-timeout-in-php
+	curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 0);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+
   $tmp_condi = curl_exec($curl);
   
   if($tmp_condi === FALSE) {
@@ -637,6 +641,8 @@ function uom_fae_api_is_url_reachable_1() {
 
   curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
+
+	http://stackoverflow.com/questions/2582057/setting-curls-timeout-in-php
   curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 0);
   curl_setopt($ch, CURLOPT_TIMEOUT, 1);
   
