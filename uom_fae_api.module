@@ -160,6 +160,8 @@ function uom_fae_api_person_publications($uri, $args = array()) {
  * Return a person's research.
  */
 function uom_fae_api_person_research($uri, $args = array()) {
+	$data = array();
+
 	$cache_id = "faeprofile:research:$uri:". md5($uri);
 
   // Mash in default arguments.
@@ -169,9 +171,13 @@ function uom_fae_api_person_research($uri, $args = array()) {
   );
   $args += $defaults;
 
-  $result = uom_fae_api_query(UOM_FAE_PERSON_RESEARCH, $args);
+  $result_grant = uom_fae_api_query(UOM_FAE_PERSON_RESEARCH, $args);
+	$result_contract = uom_fae_api_query(UOM_FAE_PERSON_RESEARCH_CONTRACT, $args);
 
-  return (!empty($result['rows'])) ? $result['rows'] : NULL;
+	$data['grant'] = $result_grant['rows'];
+	$data['contract'] = $result_contract['rows'];
+
+  return $data;
 }
 
 /**

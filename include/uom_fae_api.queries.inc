@@ -253,6 +253,36 @@ WHERE {
 }');
 
 
+define('UOM_FAE_PERSON_RESEARCH_CONTRACT', '
+SELECT
+	?grant ?grantLabel ?roleLabel ?orgLabelAward ?orgLabelAdmin ?dateStart ?dateEnd
+WHERE {
+	?grant a vivo:Contract .
+	?grant vivo:contributingRole ?role .
+	?role vivo:investigatorRoleOf <:uri> .
+	?grant rdfs:label ?grantLabel .
+	
+	OPTIONAL {
+    ?role rdfs:label ?roleLabel .
+  }
+  OPTIONAL {
+    ?grant vivo:dateTimeInterval ?dateTimeInterval .
+    ?dateTimeInterval vivo:start ?dateTimeStart .
+    ?dateTimeInterval vivo:end ?dateTimeEnd .
+    ?dateTimeStart vivo:dateTime ?dateStart .
+    ?dateTimeEnd vivo:dateTime ?dateEnd .
+  }
+  OPTIONAL {
+    ?grant vivo:grantAwardedBy ?orgAward .
+    ?orgAward rdfs:label ?orgLabelAward .
+  }
+  OPTIONAL {
+    ?grant vivo:administeredBy ?orgAdmin .
+    ?orgAdmin rdfs:label ?orgLabelAdmin .
+  }
+}');
+
+
 define('UOM_FAE_PERSON_EXTRA_GRANT', '
 SELECT
 	?extraGrantText1 ?extraGrantText2 ?extraGrantText3 ?extraGrantText4
