@@ -380,7 +380,7 @@ WHERE {
  */
 define('UOM_FAE_PERSON_QUALIFICATIONS', '
 SELECT
-  ?orgLabel ?degreeLabel ?dateEnd
+  ?orgLabel ?degreeLabel ?dateTimeEnd ?dateEnd
 WHERE {
   ?training vivo:educationalTrainingOf <:uri> .
 
