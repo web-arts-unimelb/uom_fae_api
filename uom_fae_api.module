@@ -782,10 +782,10 @@ function uom_fae_api_cache_and_backup($cache_id, $data) {
 */
 
 
-function uom_fae_api_profile_custom_cache_set($cache_id, $data) {
+function uom_fae_api_profile_custom_cache_set($cache_id, $data, $table_name='fae_profile_custom_cache') {
 	// http://stackoverflow.com/questions/8878779/sql-error-1406-data-too-long-for-column
 	// https://drupal.org/node/1676344
-	$table_name = 'fae_profile_custom_cache';
+	//$table_name = 'fae_profile_custom_cache';
 	
 	if(!db_table_exists($table_name)) {
 		$sql = "
