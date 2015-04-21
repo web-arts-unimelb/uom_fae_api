@@ -26,6 +26,7 @@ function uom_fae_api_admin_form() {
     '45' => t('45 seconds'),
     '60' => t('1 minute'),
   );
+
   $form['uom_fae_api_timeout'] = array(
     '#title' => t('Query timeout'),
     '#description' => t('Choose a timeout for your query. If the endpoint takes longer to respond, the query will be aborted.'),
@@ -51,6 +52,18 @@ function uom_fae_api_admin_form() {
     '#options' => $period,
     '#description' => t('Cached queries will not be re-sent to the configured endpoint until this much time has elapsed.')
   );
+
+	$option = array(
+		'No' => 'No',
+		'Yes' => 'Yes'
+	);
+	$form['uom_fae_api_use_clean_data'] = array(
+		'#title' => t('Force to use backup Find an Expert data to temporarily display staff information.'),
+		'#description' => t('Force to use backup Find an Expert data to temporarily display staff information.'),
+		'#type' => 'select',
+		'#options' => $option,
+		'#default_value' => variable_get('uom_fae_api_use_clean_data', 'No'),
+	);
 
   $form['#validate'][] = 'uom_foa_api_admin_form_validate';
   $form['#submit'][] = 'uom_foa_api_admin_form_submit';

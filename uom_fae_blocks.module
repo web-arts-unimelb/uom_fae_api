@@ -264,16 +264,21 @@ function uom_fae_blocks_publications($uri) {
 
   $cache_id = "uom_fae_blocks:pub:$currYear:". md5($currYear);
 
+	// Force to use fae_profile_custom_cache_clean 
+	if(uom_fae_api_is_use_clean_data()) {
+		// Notify
+		dsm('Use backup clean data');
+    $data = uom_fae_api_profile_custom_cache_get($cache_id, 'fae_profile_custom_cache_clean');
+    $vars['overview'] = $data;
 
-	// Force.....
+		// Leave early
+		return theme('uom_fae_blocks_publications', array('data' => $data, 'uri' => $uri));
+  }
 
-  $data = uom_fae_api_profile_custom_cache_get($cache_id, 'fae_profile_custom_cache');
-
+	$data = uom_fae_api_profile_custom_cache_get($cache_id, 'fae_profile_custom_cache');
 	if(empty($data)) {
 		$uom_fae_api_is_url_reachable = variable_get('uom_fae_api_is_url_reachable', FALSE);
     if($uom_fae_api_is_url_reachable) {
-
-			// NOTE: todo it should use cache?
 			$tmp_data = uom_fae_api_query(UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS, array(
         ':uri' => $uri,
         ':currYear' => sprintf("%04d", $currYear + 1),
@@ -337,9 +342,14 @@ function uom_fae_blocks_publications($uri) {
       // Joseki is down, so get the backup data
       $data = uom_fae_api_profile_custom_cache_get($cache_id, 'fae_profile_custom_cache_sync'); 
     }
-	} // End if
 
-	return theme('uom_fae_blocks_publications', array('data' => $data, 'uri' => $uri));
+		// Render and leave.
+		return theme('uom_fae_blocks_publications', array('data' => $data, 'uri' => $uri));	
+	}
+	else {
+		// There is some data in cache, so use it.
+		return theme('uom_fae_blocks_publications', array('data' => $data, 'uri' => $uri));	
+	} 
 }
 
 

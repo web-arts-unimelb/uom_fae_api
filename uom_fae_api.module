@@ -103,6 +103,17 @@ function uom_fae_api_permission() {
   );
 }
 
+// Gary
+function uom_fae_api_is_use_clean_data() {
+	$condi = variable_get('uom_fae_api_use_clean_data', 'No');
+	if($condi == 'Yes') {
+		return TRUE;
+	}
+	else {
+		return FALSE;
+	}
+}
+
 /**
  * Return overview information for a person.
  */
