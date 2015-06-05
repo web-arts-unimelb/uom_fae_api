@@ -543,38 +543,6 @@ function uom_fae_api_publication_types($key = NULL) {
   return (empty($key)) ? $types : $types[$key];
 }
 
-/*
-function uom_fae_api_is_url_reachable() {
-	// http://128.250.202.125:7001/joseki/oracle
-	$tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
-	$end_len = strlen('/oracle');
-	$full_len = strlen($tmp_url);
-	$needed_len = $full_len - $end_len; 
-	
-	$url = substr($tmp_url, 0, $needed_len);
-	
-	$condi = false;
-	// http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
-	$ch = curl_init($url);
-
-	curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
-	curl_exec($ch);
-	if(
-		curl_getinfo($ch, CURLINFO_HTTP_CODE) == 200 || 
-		curl_getinfo($ch, CURLINFO_HTTP_CODE) == 301 ||
-		curl_getinfo($ch, CURLINFO_HTTP_CODE) == 302
-	) {
-		$condi = true;
-	}
-	else {
-		$condi = false;
-	}
-	
-	curl_close($ch);
-	return $condi;
-}
-*/
 
 // http://stackoverflow.com/questions/1122845/what-is-the-fastest-way-to-determine-if-a-url-exists-in-php
 // http://stackoverflow.com/questions/16452636/php-curl-what-does-curl-exec-return
@@ -644,7 +612,7 @@ WHERE
 
 
 function uom_fae_api_is_url_reachable_1() {
-	// http://128.250.202.125:7001/joseki/oracle
+	// See top define 
   $tmp_url = variable_get('uom_fae_api_endpoint', UOM_SPARQL_ENDPOINT);
   $end_len = strlen('/oracle');
   $full_len = strlen($tmp_url);

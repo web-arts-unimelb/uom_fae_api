@@ -286,6 +286,9 @@ function uom_fae_blocks_publications($uri) {
 				'cache_id' => $cache_id,
       ));
 
+			//test
+      //dsm($pub['tmp_data']);
+
 			if (empty($tmp_data['rows'])) {
         return NULL;
       }

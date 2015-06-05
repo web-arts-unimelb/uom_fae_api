@@ -70,69 +70,6 @@ WHERE {
 
 ORDER BY DESC(?dateTimeEnd) ASC(?dateTimeStart)');
 
-/**
- * Publications by people associated with a given organisation.
- */
-/*
-define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
-SELECT
-  ?authorName ?authorRank ?person ?personLabel ?positionLabel ?orgLabel ?dateValue ?publication ?article ?parentTitle ?title ?publishOrg ?doi ?pageStart ?pageEnd ?edition ?isbn13 ?volume ?type ?myIssueNum
-WHERE {
-  ?person vivo:personInPosition ?position .
-  ?position vivo:positionInOrganization <:uri> .
-  <:uri> rdfs:label ?orgLabel .
-  ?position rdfs:label ?positionLabel .
-  ?person rdfs:label ?personLabel .
-  ?person vivo:authorInAuthorship ?authorship .
-
-  ?authorship vivo:authorNameAsListed ?authorName .
-  ?authorship vivo:authorRank ?authorRank .
-
-  ?authorship vivo:linkedInformationResource ?article .
-  ?article rdfs:label ?title .
-  ?article rdf:type ?type .
-
-  ?article vivo:dateTimeValue ?dateTimeValue .
-  ?dateTimeValue vivo:dateTime ?dateValue .
-
-  ?article vivo:publisher ?publisher .
-  ?publisher rdfs:label ?publishOrg .
-
-	OPTIONAL {
-		?article fae:parentTitle ?parentTitle .
-	}
-  OPTIONAL {
-    ?article vivo:hasPublicationVenue ?pubVenue .
-    ?pubVenue rdfs:label ?publication .
-  }
-  OPTIONAL {
-    ?article bibo:doi ?doi
-  }
-  OPTIONAL {
-    ?article bibo:pageStart ?pageStart
-  }
-  OPTIONAL {
-    ?article bibo:pageEnd ?pageEnd
-  }
-  OPTIONAL {
-    ?article bibo:edition ?edition
-  }
-  OPTIONAL {
-    ?article bibo:isbn13 ?isbn13
-  }
-  OPTIONAL {
-    ?article bibo:volume ?volume
-  }
-  OPTIONAL {
-    ?article bibo:issue ?myIssueNum
-  }
-
-  FILTER (?dateValue >= ":prevYear-01-01T00:00:00Z"^^xsd:dateTime)
-  FILTER (?dateValue  < ":currYear-01-01T00:00:00Z"^^xsd:dateTime)
-  FILTER regex(?type, "findanexpert")
-}
-ORDER BY ASC(?title)');
-*/
 
 define('UOM_FAE_BLOCKS_ORGANISATION_PUBLICATIONS', '
 
@@ -176,8 +113,8 @@ WHERE {
 	# Drawback: even we know some publication type wont have ?publisher,
   # putting optional will timeout this query. 
 	#OPTIONAL { 
-  	?article vivo:publisher ?publisher .
-  	?publisher rdfs:label ?publish_org .
+  # ?article vivo:publisher ?publisher .
+  #	?publisher rdfs:label ?publish_org .
 	#}  
 
   OPTIONAL {
