@@ -3,7 +3,7 @@
  * @file
  */
 
-define('UOM_SPARQL_ENDPOINT', 'http://128.250.202.125:7001/joseki/oracle');
+define('UOM_SPARQL_ENDPOINT', 'https://mrw.app.unimelb.edu.au/joseki/oracle');
 define('FAE_BASE', 'http://www.findanexpert.unimelb.edu.au/');
 define('FAE_MODULE_CACHE_TIME', '86400');
 
@@ -397,7 +397,7 @@ function uom_fae_api_query($query, $args = array()) {
 
 		if($result === NULL) {
 			// Throw dsm errors
-      $msg = 'sparql_request returns null. Possible error connection timed out after 30 seconds in ARC2_Reader. E.g. the grant query, but other query will be perfectly fine. Now this grant query becomes bottleneck. The page needs to wait for it to finish, then it starts to render itself. As a result, all tabs will be displayed except the grant tab.';
+      $msg = 'sparql_request returns null. Solution: clear find an expert cache? Possible error connection timed out after 30 seconds in ARC2_Reader. E.g. the grant query, but other query will be perfectly fine. Now this grant query becomes bottleneck. The page needs to wait for it to finish, then it starts to render itself. As a result, all tabs will be displayed except the grant tab.';
       dsm('- start -');
       dsm($msg);
       dsm($query);
@@ -566,7 +566,7 @@ function uom_fae_api_is_url_reachable() {
   //$url = substr($tmp_url, 0, $needed_len);
 
 	$url = $tmp_url;
-  $curl = curl_init($url);
+  //$curl = curl_init($url);
 
 	$the_query = "
 PREFIX dc:    <http://purl.org/dc/elements/1.1/>
@@ -627,7 +627,7 @@ function uom_fae_api_is_url_reachable_1() {
   curl_setopt($ch, CURLOPT_NOBODY, true); // set to HEAD request
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // don't output the response
 
-	http://stackoverflow.com/questions/2582057/setting-curls-timeout-in-php
+	//http://stackoverflow.com/questions/2582057/setting-curls-timeout-in-php
   curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 0);
   curl_setopt($ch, CURLOPT_TIMEOUT, 1);
   
