@@ -420,6 +420,9 @@ function uom_fae_api_query($query, $args = array()) {
 		}
 	}
 	else {
+		//test
+		//dsm($query);
+
 		// Get result from backup data plan
 		// In here, Joseki is definitely down.
     dsm('Joseki is down. Each tab use its cache data, which set in preprecess func');
@@ -598,6 +601,13 @@ WHERE
   
   if($tmp_condi === FALSE) {
   	$condi = FALSE;
+
+		// Hack
+		/*
+    dsm("Hack: force curl to return true. Will fix later");
+    dsm("More here: http://stackoverflow.com/questions/32336079/post-curl-request-timeout");
+    $condi = TRUE;
+		*/
 
 		// Gary: in case the log gets too big 
 		//uom_fae_api_curl_log($curl);
